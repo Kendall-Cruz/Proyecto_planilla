@@ -27,9 +27,9 @@ public class Deduccion implements Serializable {
     @NotBlank(message = "El nombre de la deducción no puede estar vacío")
     @Column(length = 50)
     private String nombre_deduccion;
-    @NotBlank(message = "El tipo de deducción no puede estar vacío")
-    @Column(length = 15)
-    private String tipo_deduccion; // Puede ser "Fijo" o "Variable"
+    
+    private boolean porcentaje;
+    
     @NotNull(message = "El valor de la deducción no puede estar vacío")
     private double valor_deduccion; // Puede ser un monto fijo o un porcentaje del salario base
     
