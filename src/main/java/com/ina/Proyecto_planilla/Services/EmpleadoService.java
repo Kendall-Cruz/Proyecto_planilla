@@ -39,5 +39,10 @@ public class EmpleadoService implements IEmpleadoService {
             throw new RuntimeException("No se encontró un puesto activo para el empleado en el mes anterior.");
         }
     }
+
+    @Override
+    public List<Empleado> findAllEmpleadoActivoFecha(LocalDate fecha) {
+        return empleadoDao.findAllEmpleadoActivoEnMesSQL(fecha);
+    }
     
 }

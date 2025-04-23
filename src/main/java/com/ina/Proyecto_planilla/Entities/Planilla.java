@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,13 +26,13 @@ public class Planilla implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id_planilla;
-    
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull(message = "La fecha de planilla no puede estar vacía")
     private LocalDate fecha_planilla;
-    
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull(message = "La fecha de pago quincenal no puede estar vacía")
     private LocalDate fecha_pago_quincenal;
-    
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull(message = "La fecha de pago mensual no puede estar vacía")
     private LocalDate fecha_pago_mensual;
     

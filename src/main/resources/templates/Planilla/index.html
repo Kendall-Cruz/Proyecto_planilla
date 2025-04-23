@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head th:replace="Layout/plantilla :: head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <header th:replace="Layout/plantilla :: header"></header>
+
+    <div class="container">
+        <div class="row mt-4">
+            <div class="col-2 text-center">
+                <h1 class="card-title titulo">
+                    Planillas
+                </h1>
+                <hr>
+            </div>
+            <div class="col-10">
+                <div class="text-end mt-2">
+                    <a th:href="@{/planillas/generar}" class="btn btn-primary text-center">Generar planilla</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col">
+                <div class="card shadow-lg p-4 text-center tarjeta">
+                    <h4 class="titulo">No se registran planillas</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

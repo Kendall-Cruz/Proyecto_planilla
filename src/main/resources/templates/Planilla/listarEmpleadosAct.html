@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+
+<head th:replace="Layout/plantilla :: head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <header th:replace="Layout/plantilla :: header"></header>
+
+
+    <div class="container">
+        <div class="row text-center mt-3">
+            <h4 class="titulo">
+                Búsqueda empleados activos
+            </h4>
+        </div>
+    
+        <div class="row justify-content-center mt-4">
+            
+            <form class="col-md-6" th:action="@{/planillas/filtrarEmpleados}" method="get">
+                <div class="input-group">
+                    <label class="input-group-text" for="fecha">Filtrar por fecha</label>
+                    <input type="date" class="form-control" id="fecha" name="fecha" value="null">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                </div>
+            </form>
+        </div>
+    
+        <div class="row">
+            <div class="row mt-4">
+                <div th:if="${empleados == null or empleados.empty}" class="text-center p-5 custom-card rounded-3 shadow tarjeta">
+                    <i class="bi bi-people fs-1 accent-color mb-3"></i>
+                    <h3>No se encuentran empleados para la fecha seleccionada</h3>
+                </div>
+    
+                <div th:if="${empleados != null and !empleados.empty}" class="table-container p-3">
+                    <table id="empleadosTable" class="table table-success table-striped table-hover shadow-lg">
+                        <thead>
+                            <tr>
+                                <th>Cédula</th>
+                                <th>Nombre completo</th>
+                                <th>Teléfono</th>
+                                <th>Correo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="emp : ${empleados}">
+                                <td th:text="${emp.cedula}">123456789</td>
+                                <td th:text="${emp.nombre + ' ' + emp.apellido1 + (emp.apellido2 != null ? ' ' + emp.apellido2 : '')}">Nombre Completo</td>
+                                <td th:text="${emp.telefono}">12345678</td>
+                                <td th:text="${emp.correo}">correo@ejemplo.com</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5 w-50 mx-auto">
+            <a th:href="@{/planillas/generar}" class="btn btn-success">Volver</a>
+        </div>
+    
+        
+    </div>
+    
+</body>
+
+</html>

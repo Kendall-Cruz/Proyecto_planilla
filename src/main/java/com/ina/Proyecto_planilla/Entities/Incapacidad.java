@@ -3,6 +3,8 @@ package com.ina.Proyecto_planilla.Entities;
 import java.io.Serializable;
 import java.time.LocalDate;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,10 +28,10 @@ public class Incapacidad implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_empleado", nullable = false)
     private Empleado empleado;
-    
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull(message = "La fecha de inicio no puede estar vacía")
     private LocalDate fecha_inicio;
-    
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull(message = "La fecha de fin no puede estar vacía")
     private LocalDate fecha_fin;
 }

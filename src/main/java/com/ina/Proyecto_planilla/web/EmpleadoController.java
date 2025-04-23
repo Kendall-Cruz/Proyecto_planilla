@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.ina.Proyecto_planilla.Entities.Empleado;
 import com.ina.Proyecto_planilla.Services.IEmpleadoService;
 
+
 @Controller
 @RequestMapping("/empleados")
 public class EmpleadoController {
@@ -28,6 +29,8 @@ public class EmpleadoController {
 
         return "Empleado/index"; 
     }
+
+    
     
     
 }

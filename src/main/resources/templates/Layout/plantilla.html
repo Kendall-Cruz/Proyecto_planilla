@@ -8,35 +8,13 @@
     <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.7.2/css/all.min.css}">
     <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.min.css">
     <link rel="stylesheet" href="/css/EmpleadoIndex.css">
+    <link rel="stylesheet" href="/css/Shared.css">
     <title>Sistema de ventas</title>
     <script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        .navbar {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .navbar-title{
-            font-family: "Montserrat", sans-serif;
-        }
-
-        .nav-link:hover {
-            color: #3B82F6 !important;
-        }
-
-        body{
-            background-color:#cecece;
-        }
-        p{
-            color: #E4E4E7 ;
-        }
 
     </style>
 </head>
@@ -44,7 +22,7 @@
     <header th:fragment="header">
             <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #2f2f46;">
                 <div class="container-fluid">
-                <img src="/img/LogoPlanilla.png" alt="" width="50" height="auto" class="border-1 rounded-1 px-3">
+                <img src="/img/LogoPlanilla.png" alt="" width="70" height="auto" class="border-1 rounded-1 px-3">
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarOpciones" aria-controls="navbarOpciones" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -55,7 +33,7 @@
                         <a class="nav-link text-white navbar-title" th:href="@{/empleados/}">Empleados</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white navbar-title" href="#">Planillas</a>
+                        <a class="nav-link text-white navbar-title" th:href="@{/planillas/}">Planillas</a>
                     </li>
                     </ul>
                 </div>

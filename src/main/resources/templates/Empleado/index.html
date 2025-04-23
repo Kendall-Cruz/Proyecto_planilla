@@ -10,7 +10,7 @@
     <header th:replace="Layout/plantilla :: header"></header>
     <div class="container py-5">
         <div class="text-center mb-5">
-            <h1 class="fw-bold text-light">Empleados</h1>
+            <h1 class="fw-bold titulo">Empleados</h1>
             <div class="border-bottom-accent mb-4"></div>
         </div>
         
@@ -20,7 +20,7 @@
         </div>
         
         <div th:if="${empleados != null and !empleados.empty}" class="table-container p-3">
-            <table id="empleadosTable" class="table table-hover">
+            <table id="empleadosTable" class="table table-success table-striped table-hover shadow-lg">
                 <thead>
                     <tr>
                         <th>Cédula</th>
@@ -61,10 +61,11 @@
                     url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
                 },
                 responsive: true,
-                lengthMenu: [5, 10, 25, 50],
                 pageLength: 5,
                 columnDefs: [
-                    { orderable: false, targets: 4 }  // Deshabilitar ordenamiento en columna de acciones
+                    { orderable: false, targets: 4 },
+                    { className: 'dt-center', targets: [1, 2, 3] },
+                    { className: 'text-start', targets: [0] }
                 ]
             });
         });
