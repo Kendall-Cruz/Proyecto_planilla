@@ -27,55 +27,54 @@
         </div>
         <div class="row mt-5 text-center mx-auto card p-4 shadow-lg border-0">
             <div class="d-flex justify-content-center ">
-                <form class="row g-2 align-items-center">
+                <form th:object="${planilla}" method="post" class="row g-2 align-items-center">
 
                     <!-- Tipo Planilla -->
                     <div class="col-auto m-2">
                         <div class="input-group shadow-sm">
-                            <span class="input-group-text bg-light" id="lblTipoPlanilla">Tipo</span>
-                            <select class="form-select" id="tipo_planilla" name="tipo_planilla" required>
+                            <span class="input-group-text bg-light">Tipo</span>
+                            <select class="form-select" th:field="*{tipo_planilla}" required>
                                 <option value="">Seleccione</option>
                                 <option value="Ordinaria">Ordinaria</option>
                                 <option value="Extraordinaria">Extraordinaria</option>
                             </select>
                         </div>
                     </div>
-
-
+                
                     <!-- Fecha Planilla -->
                     <div class="col-auto m-2">
                         <div class="input-group shadow-sm">
-                            <span class="input-group-text" id="lblFechaPlanilla">Planilla</span>
-                            <input type="date" class="form-control" id="fecha_planilla" name="fecha_planilla" required>
+                            <span class="input-group-text">Planilla</span>
+                            <input type="date" class="form-control" th:field="*{fecha_planilla}" required>
                         </div>
                     </div>
-
+                
                     <!-- Fecha Pago Quincenal -->
                     <div class="col-auto m-2">
                         <div class="input-group shadow-sm">
-                            <span class="input-group-text" id="lblPagoQuincenal">Pago quincenal</span>
-                            <input type="date" class="form-control" id="fecha_pago_quincenal"
-                                name="fecha_pago_quincenal" required>
+                            <span class="input-group-text">Pago quincenal</span>
+                            <input type="date" class="form-control" th:field="*{fecha_pago_quincenal}" required>
                         </div>
                     </div>
-
+                
                     <!-- Fecha Pago Mensual -->
-                    <div class="col-auto m-2 ">
+                    <div class="col-auto m-2">
                         <div class="input-group shadow-sm">
-                            <span class="input-group-text" id="lblPagoMensual">Pago Mensual</span>
-                            <input type="date" class="form-control" id="fecha_pago_mensual" name="fecha_pago_mensual"
-                                required>
+                            <span class="input-group-text">Pago Mensual</span>
+                            <input type="date" class="form-control" th:field="*{fecha_pago_mensual}" required>
                         </div>
                     </div>
-
-
+                
+                    <!-- Botón -->
+                    <div class="row mx-auto w-25 mt-5">
+                        <button type="submit" class="btn btn-primary shadow-sm p-2">Generar planilla</button>
+                    </div>
+                
                 </form>
-
+                
             </div>
         </div>
-        <div class="row mx-auto w-25 mt-5 ">
-            <button type="submit" class="btn btn-primary shadow-sm p-2">Generar planilla</button>
-        </div>
+
     </div>
 
 

@@ -36,7 +36,7 @@ public class EmpleadoService implements IEmpleadoService {
         if (puestoActivo.isPresent()) {
             return puestoActivo.get().getPuesto().getSalario_base();
         } else {
-            throw new RuntimeException("No se encontró un puesto activo para el empleado en el mes anterior.");
+            return 0.0;
         }
     }
 
