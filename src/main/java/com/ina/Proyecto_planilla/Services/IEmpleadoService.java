@@ -8,4 +8,5 @@ import com.ina.Proyecto_planilla.Entities.Empleado;
 public interface IEmpleadoService {
     public List<Empleado> listarEmpleados();
     public List<Empleado> findAllEmpleadoActivoFecha(LocalDate fecha);
+    public Double obtenerSalarioBaseMesAnterior(Long empleadoId, LocalDate fechaPlanilla);
 }

@@ -22,7 +22,7 @@ public class EmpleadoService implements IEmpleadoService {
     public List<Empleado> listarEmpleados() {
         return empleadoDao.findAll();
     }
-
+    @Override
     public Double obtenerSalarioBaseMesAnterior(Long empleadoId, LocalDate fechaPlanilla) {
         // Calcular el primer día del mes anterior
         YearMonth mesAnterior = YearMonth.from(fechaPlanilla).minusMonths(1);
