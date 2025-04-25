@@ -34,14 +34,14 @@ public class PlanillaService implements IPlanillaService {
     public boolean generarPlanilla(Planilla planilla) {
         try {
 
-            double salario_base = 0.0;
+            double salario_mes_pasado = 0.0;
 
             List<Empleado> empleados = empleadoService.findAllEmpleadoActivoFecha(planilla.getFecha_planilla());
 
             for (Empleado empleado : empleados) {
 
                 Detalle_planilla detalle = new Detalle_planilla(empleado, planilla);
-                salario_base = empleadoService.obtenerSalarioBaseMesAnterior(empleado.getId_empleado(), planilla.getFecha_planilla());
+                salario_mes_pasado = empleadoService.obtenerSalarioBaseMesAnterior(empleado.getId_empleado(), planilla.getFecha_planilla());
                 
 
                 detallePlanillaDao.save(detalle);
@@ -70,10 +70,8 @@ public class PlanillaService implements IPlanillaService {
             LocalDate inicio = incapacidad.getFecha_inicio().isBefore(primerDiaMes) ? primerDiaMes : incapacidad.getFecha_inicio();
             LocalDate fin = incapacidad.getFecha_fin().isAfter(ultimoDiaMes) ? ultimoDiaMes : incapacidad.getFecha_fin();
 
-            // Calcular los días válidos en el mes
             int dias = (int) ChronoUnit.DAYS.between(inicio, fin) + 1;
 
-            // Evitar negativos si las fechas no se solapan
             if (dias > 0) {
                 totalDiasIncapacidad += dias;
             }
@@ -82,7 +80,17 @@ public class PlanillaService implements IPlanillaService {
         // Guardar en el detalle si tenés ese campo
         
 
-        return (double) totalDiasIncapacidad;
+        return calcularMontoIncapacidad(totalDiasIncapacidad, detallePlanilla.getEmpleado().getPuestos_empleado().get);
+    }
+
+    public double calcularMontoIncapacidad(int diasIncapacidad, double salarioBase) {
+        double salarioDiario = salarioBase / 20;
+        
+        if(diasIncapacidad > 3) {
+            return (salarioDiario * diasIncapacidad) * 0.40; 
+        } else {
+            return 0.0;
+        }
     }
 
     @Override
