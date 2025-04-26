@@ -42,7 +42,10 @@ public class PlanillaService implements IPlanillaService {
 
                 Detalle_planilla detalle = new Detalle_planilla(empleado, planilla);
                 salario_mes_pasado = empleadoService.obtenerSalarioBaseMesAnterior(empleado.getId_empleado(), planilla.getFecha_planilla());
-                
+
+                // Verificar incapacidades  
+                //Hacer cambios en la tabla de detalle_planilla para que se guarde el monto de la incapacidad que equivale al subsidio
+                double subsidio = verificarIncapacidades(empleado.getId_empleado(), planilla.getFecha_planilla(), salario_mes_pasado);
 
                 detallePlanillaDao.save(detalle);
 
@@ -55,7 +58,7 @@ public class PlanillaService implements IPlanillaService {
     }
 
     @Override
-    public double verificarIncapacidades(Long empleadoId, LocalDate fechaPlanilla, Detalle_planilla detallePlanilla) {
+    public double verificarIncapacidades(Long empleadoId, LocalDate fechaPlanilla, double salarioBase) {
 
         List<Incapacidad> incapacidades = incapacidadDao.findByEmpleadoIdAndFecha(empleadoId, fechaPlanilla);
 
@@ -80,7 +83,7 @@ public class PlanillaService implements IPlanillaService {
         // Guardar en el detalle si tenés ese campo
         
 
-        return calcularMontoIncapacidad(totalDiasIncapacidad, detallePlanilla.getEmpleado().getPuestos_empleado().get);
+        return calcularMontoIncapacidad(totalDiasIncapacidad, salarioBase); 
     }
 
     public double calcularMontoIncapacidad(int diasIncapacidad, double salarioBase) {

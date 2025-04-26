@@ -10,6 +10,6 @@ public interface IPlanillaService {
 
     public boolean generarDetallePlanilla(Detalle_planilla detallePlanilla);
 
-    public double verificarIncapacidades(Long empleadoId , LocalDate fechaPlanilla , Detalle_planilla detallePlanilla);
+    public double verificarIncapacidades(Long empleadoId , LocalDate fechaPlanilla , double salarioBase);
 
 }

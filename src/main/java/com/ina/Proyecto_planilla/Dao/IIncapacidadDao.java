@@ -11,10 +11,10 @@ import com.ina.Proyecto_planilla.Entities.Incapacidad;
 
 public interface IIncapacidadDao extends JpaRepository<Incapacidad, Long> {
 
-    @Query(value = "SELECT * FROM incapacidad i "
-            + "WHERE i.empleado_id = :empleadoId "
+    @Query(value = "SELECT * FROM dbo.Incapacidades i "
+            + "WHERE i.id_empleado = :empleadoId "
             + "AND i.fecha_inicio <= EOMONTH(:fecha) "
-            + "AND i.fecha_fin >= DATEFROMPARTS(YEAR(:fecha), MONTH(:fecha), 1)", // Primer día del mes
+            + "AND i.fecha_fin >= DATEFROMPARTS(YEAR(:fecha), MONTH(:fecha), 1)",
             nativeQuery = true)
     List<Incapacidad> findByEmpleadoIdAndFecha(@Param("empleadoId") Long empleadoId, @Param("fecha") LocalDate fecha);
 
