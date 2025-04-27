@@ -75,6 +75,12 @@ public class Detalle_planilla implements Serializable {
     @NotNull(message = "El monto porcentaje renta no puede estar vacío")
     @Getter @Setter
     private double monto_porcentaje_renta;
+    @NotNull(message = "El monto pensiones no puede estar vacío")
+    @Getter @Setter
+    private double monto_pensiones;
+    @NotNull(message = "El monto subsidio renta no puede estar vacío")
+    @Getter @Setter
+    private double monto_subsidio;
 
     @OneToMany(mappedBy = "detalle_planilla")
     @Getter @Setter

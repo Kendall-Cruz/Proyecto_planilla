@@ -25,5 +25,6 @@ public class Porcentaje_renta implements Serializable {
     private double tope_maximo;
     @NotNull(message = "El porcentaje no puede estar vacío")
     private double porcentaje; 
+    private String anio_vigencia;  
 
 }

@@ -41,6 +41,5 @@ public class Puesto_empleado implements Serializable {
     @NotNull(message = "La fecha de vencimiento no puede estar vacía")
     private LocalDate fecha_vence;
     
-    private boolean tipo_salario;
     private boolean borrado;
 }
