@@ -2,7 +2,6 @@ package com.ina.Proyecto_planilla.Dao;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,7 +19,7 @@ public interface IEmpleadoDao extends JpaRepository<Empleado, Long> {
     @Query("SELECT pe FROM Puesto_empleado pe "
             + "WHERE pe.empleado.id_empleado = :empleadoId "
             + "AND :fecha BETWEEN pe.fecha_nombramiento AND pe.fecha_vence")
-    Optional<Puesto_empleado> findActivePuestoByEmpleadoAndDate(@Param("empleadoId") Long empleadoId, @Param("fecha") LocalDate fecha);
+    Puesto_empleado findActivePuestoByEmpleadoAndDate(@Param("empleadoId") Long empleadoId, @Param("fecha") LocalDate fecha);
 
     @Query(value = "SELECT DISTINCT e.* FROM Puestos_empleado pe "
             + "JOIN Empleados e ON pe.id_empleado = e.id_empleado "

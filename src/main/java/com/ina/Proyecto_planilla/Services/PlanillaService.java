@@ -7,13 +7,18 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ina.Proyecto_planilla.Dao.IDeduccionDao;
 import com.ina.Proyecto_planilla.Dao.IDetalle_planillaDao;
+import com.ina.Proyecto_planilla.Dao.IEmpleadoDao;
 import com.ina.Proyecto_planilla.Dao.IIncapacidadDao;
 import com.ina.Proyecto_planilla.Dao.IPlanillaDao;
+import com.ina.Proyecto_planilla.Entities.Deduccion;
+import com.ina.Proyecto_planilla.Entities.Detalle_deduccion;
 import com.ina.Proyecto_planilla.Entities.Detalle_planilla;
 import com.ina.Proyecto_planilla.Entities.Empleado;
 import com.ina.Proyecto_planilla.Entities.Incapacidad;
 import com.ina.Proyecto_planilla.Entities.Planilla;
+import com.ina.Proyecto_planilla.Entities.Puesto_empleado;
 
 import jakarta.transaction.Transactional;
 
@@ -23,11 +28,15 @@ public class PlanillaService implements IPlanillaService {
     @Autowired
     private IEmpleadoService empleadoService;
     @Autowired
+    private IEmpleadoDao empleadoDao;
+    @Autowired
     private IPlanillaDao planillaDao;
     @Autowired
     private IIncapacidadDao incapacidadDao;
     @Autowired
     private IDetalle_planillaDao detallePlanillaDao;
+    @Autowired
+    private IDeduccionDao deduccionDao;
 
     @Transactional
     @Override
@@ -41,11 +50,25 @@ public class PlanillaService implements IPlanillaService {
             for (Empleado empleado : empleados) {
 
                 Detalle_planilla detalle = new Detalle_planilla(empleado, planilla);
+                Puesto_empleado puesto = empleadoDao.findActivePuestoByEmpleadoAndDate(empleado.getId_empleado(), planilla.getFecha_planilla());
                 salario_mes_pasado = empleadoService.obtenerSalarioBaseMesAnterior(empleado.getId_empleado(), planilla.getFecha_planilla());
 
-                // Verificar incapacidades  
-                //Hacer cambios en la tabla de detalle_planilla para que se guarde el monto de la incapacidad que equivale al subsidio
-                double subsidio = verificarIncapacidades(empleado.getId_empleado(), planilla.getFecha_planilla(), salario_mes_pasado);
+
+                // Verificar incapacidades
+                //Subsidio  
+                detalle.setMonto_subsidio(verificarIncapacidades(empleado.getId_empleado(), planilla.getFecha_planilla(), salario_mes_pasado)); 
+
+                //Aplicar pagos si el salario no es global
+                if(!puesto.getPuesto().isSalario_global()){
+
+
+                }
+                //Si no se aplican solo las deducciones
+
+
+
+
+                
 
                 detallePlanillaDao.save(detalle);
 
@@ -80,7 +103,6 @@ public class PlanillaService implements IPlanillaService {
             }
         }
 
-        // Guardar en el detalle si tenés ese campo
         
 
         return calcularMontoIncapacidad(totalDiasIncapacidad, salarioBase); 
@@ -96,9 +118,46 @@ public class PlanillaService implements IPlanillaService {
         }
     }
 
+    public double calcularDeducciones(Detalle_planilla detallePlanilla, double salarioBruto) {
+        List<Deduccion> deducciones = deduccionDao.findAllDuccionesAct();
+        double montoDeduccion = 0.0;
+        //int anios_trabajados = 0; // Variable para almacenar los años trabajados
+
+        for (Deduccion deduccion : deducciones) {
+
+            Detalle_deduccion detalleDeduccion = new Detalle_deduccion();
+
+            detalleDeduccion.setDeduccion(deduccion);
+            detalleDeduccion.setDetalle_planilla(detallePlanilla);
+
+
+            if (deduccion.isPorcentaje()) {
+                
+                // Si la deducción es un porcentaje, calcular el monto basado en el salario base
+                montoDeduccion = (salarioBruto * deduccion.getValor_deduccion()) / 100;
+
+            }
+            else {
+                // Si la deducción es un monto fijo, restar el valor de la deducción al total
+                montoDeduccion = salarioBruto - deduccion.getValor_deduccion();
+            }
+
+            detalleDeduccion.setMonto(montoDeduccion);
+
+
+
+        }
+
+        return 0;
+    }
+
+
+
+
+
+
     @Override
     public boolean generarDetallePlanilla(Detalle_planilla detallePlanilla) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'generarDetallePlanilla'");
     }
 
