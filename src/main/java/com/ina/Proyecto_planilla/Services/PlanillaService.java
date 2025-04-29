@@ -8,11 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ina.Proyecto_planilla.Dao.IDeduccionDao;
-import com.ina.Proyecto_planilla.Dao.IDetalle_pago;
+import com.ina.Proyecto_planilla.Dao.IDetalle_deduccionDao;
+import com.ina.Proyecto_planilla.Dao.IDetalle_pagoDao;
 import com.ina.Proyecto_planilla.Dao.IDetalle_planillaDao;
 import com.ina.Proyecto_planilla.Dao.IEmpleadoDao;
 import com.ina.Proyecto_planilla.Dao.IIncapacidadDao;
 import com.ina.Proyecto_planilla.Dao.IPagoDao;
+import com.ina.Proyecto_planilla.Dao.IPensionDao;
 import com.ina.Proyecto_planilla.Dao.IPlanillaDao;
 import com.ina.Proyecto_planilla.Entities.Deduccion;
 import com.ina.Proyecto_planilla.Entities.Detalle_deduccion;
@@ -21,6 +23,7 @@ import com.ina.Proyecto_planilla.Entities.Detalle_planilla;
 import com.ina.Proyecto_planilla.Entities.Empleado;
 import com.ina.Proyecto_planilla.Entities.Incapacidad;
 import com.ina.Proyecto_planilla.Entities.Pago;
+import com.ina.Proyecto_planilla.Entities.Pension;
 import com.ina.Proyecto_planilla.Entities.Planilla;
 import com.ina.Proyecto_planilla.Entities.Puesto_empleado;
 
@@ -44,7 +47,11 @@ public class PlanillaService implements IPlanillaService {
     @Autowired
     private IPagoDao pagoDao;
     @Autowired
-    private IDetalle_pago detallePagoDao;
+    private IDetalle_pagoDao detallePagoDao;
+    @Autowired
+    private IDetalle_deduccionDao detalleDeduccionDao;
+    @Autowired 
+    private IPensionDao pensionDao;
 
     @Transactional
     @Override
@@ -52,38 +59,37 @@ public class PlanillaService implements IPlanillaService {
         try {
 
             double salario_mes_pasado = 0.0;
+            double salario = 0;
 
             List<Empleado> empleados = empleadoService.findAllEmpleadoActivoFecha(planilla.getFecha_planilla());
 
             for (Empleado empleado : empleados) {
 
                 Detalle_planilla detalle = new Detalle_planilla(empleado, planilla);
-                Puesto_empleado puesto = empleadoDao.findActivePuestoByEmpleadoAndDate(empleado.getId_empleado(), planilla.getFecha_planilla());
+                Puesto_empleado puesto = empleadoDao.findActivePuestoByEmpleadoAndDate(empleado.getId_empleado(), planilla.getFecha_planilla()); //Puesto activo para la fecha de planilla
                 salario_mes_pasado = empleadoService.obtenerSalarioBaseMesAnterior(empleado.getId_empleado(), planilla.getFecha_planilla());
-
+                salario = puesto.getPuesto().getSalario_base(); //Salario_Bruto
+                int anios_trabajados = empleadoDao.countTotalDiasTrabajados(empleado.getId_empleado()) / 365;
 
                 // Verificar incapacidades
                 //Subsidio  
-                detalle.setMonto_subsidio(verificarIncapacidades(empleado.getId_empleado(), planilla.getFecha_planilla(), salario_mes_pasado)); 
-
-                int anios_trabajados = empleadoDao.countTotalDiasTrabajados(empleado.getId_empleado()) / 365;
+                double subsidio = verificarIncapacidades(empleado.getId_empleado(), planilla.getFecha_planilla(), salario_mes_pasado);
+                detalle.setMonto_subsidio(subsidio == salario_mes_pasado ? salario_mes_pasado * 0.40 : subsidio);
 
                 //Aplicar pagos si el salario no es global
-                if(!puesto.getPuesto().isSalario_global()){ //Tiene que ser salario del mes actual
-                    detalle.setDeducciones(calcularDeducciones(detalle, salario_mes_pasado, anios_trabajados));
+                if (!puesto.getPuesto().isSalario_global()) { //Tiene que ser salario del mes actual
+                    detalle.setPagos(calcularPagos(detalle, puesto, anios_trabajados));
+                    salario = salario + detalle.getPagos();
                 }
-                //Si no se aplican solo las deducciones
-
-
-
-
-                
+                //Si no se aplican solo las deducciones                     //Equivale al salario_bruto
+                detalle.setDeducciones(calcularDeducciones(detalle, puesto, salario, anios_trabajados));
 
                 detallePlanillaDao.save(detalle);
 
             }
 
             return true;
+
         } catch (Exception e) {
             return false;
         }
@@ -112,24 +118,21 @@ public class PlanillaService implements IPlanillaService {
             }
         }
 
-        
-
-        return calcularMontoIncapacidad(totalDiasIncapacidad, salarioBase); 
+        return calcularMontoIncapacidad(totalDiasIncapacidad, salarioBase);
     }
 
     public double calcularMontoIncapacidad(int diasIncapacidad, double salarioBase) {
         double salarioDiario = salarioBase / 20;
-        
-        if(diasIncapacidad > 3) {
-            return (salarioDiario * diasIncapacidad) * 0.40; 
+
+        if (diasIncapacidad > 3) {
+            return (salarioDiario * diasIncapacidad) * 0.40;
         } else {
-            return 0.0;
+            return salarioBase;
         }
     }
 
-
-    public double calcularPagos(Detalle_planilla detallePlanilla, double salarioBruto , int anios_trabajados) {
-        List<Pago> pagos = pagoDao.findAllPagosActivos(); 
+    public double calcularPagos(Detalle_planilla detallePlanilla, Puesto_empleado puesto, int anios_trabajados) {
+        List<Pago> pagos = pagoDao.findByActivoTrue();
         double montoPago;
         double sumaPagos = 0.0; // Variable para almacenar la suma de los pagos 
 
@@ -140,61 +143,93 @@ public class PlanillaService implements IPlanillaService {
             detallePago.setPago(pago);
             detallePago.setDetalle_planilla(detallePlanilla);
 
-            if (pago.isPorcentaje()) {
-                // Si el pago es un porcentaje, calcular el monto basado en el salario base
-                montoPago = (salarioBruto * pago.getValor_pago()) / 100;
-                if(pago.isUsa_fechas())
-                    montoPago = montoPago * anios_trabajados; // Multiplicar por los años trabajados
-            } else {
-                // Si el pago es un monto fijo, sumar el valor del pago al total
-                montoPago = pago.getValor_pago();
-                if(pago.isUsa_fechas())
-                    montoPago = montoPago * anios_trabajados; // Multiplicar por los años trabajados
+            //Si la categoría del pago es igual a la categoría del puesto o si la categoría del pago es igual a cero lo cual se aplica para cualquier categoría
+            if (puesto.getPuesto().getCategoria() == pago.getCategoria() || pago.getCategoria() == 0) {
+                if (pago.isPorcentaje()) {
+                    // Si el pago es un porcentaje, calcular el monto basado en el salario base
+                    montoPago = (puesto.getPuesto().getSalario_base() * pago.getValor_pago()) / 100;
+                    if (pago.isUsa_fechas()) {
+                        montoPago = montoPago * anios_trabajados; // Multiplicar por los años trabajados
+                    }
+                } else {
+                    // Si el pago es un monto fijo, sumar el valor del pago al total
+                    montoPago = pago.getValor_pago();
+                    if (pago.isUsa_fechas()) {
+                        montoPago = montoPago * anios_trabajados; // Multiplicar por los años trabajados
+
+                    }
+                }
+                sumaPagos += montoPago; // Sumar el monto del pago a la suma total  
+
+                detallePago.setMonto(montoPago);
+
+                // Guardar el detalle del pago en la base de datos
+                detallePagoDao.save(detallePago);
             }
-            sumaPagos += montoPago; // Sumar el monto del pago a la suma total  
 
-            detallePago.setMonto(montoPago);
-
-            // Guardar el detalle del pago en la base de datos
-            detallePagoDao.save(detallePago); 
         }
 
-        return sumaPagos; // Retornar el monto total de pagos
+        return sumaPagos;
     }
 
-    public double calcularDeducciones(Detalle_planilla detallePlanilla, double salarioBruto , int diasTrabajados) {
-        List<Deduccion> deducciones = deduccionDao.findAllDuccionesAct();
+    public double calcularDeducciones(Detalle_planilla detallePlanilla, Puesto_empleado puesto, double salarioBruto, int añosTrabajados) {
+        List<Deduccion> deducciones = deduccionDao.findByActivoTrue();
         double montoDeduccion = 0.0;
-        //int anios_trabajados = 0; // Variable para almacenar los años trabajados
+        double sumaDeducciones = 0;
 
         for (Deduccion deduccion : deducciones) {
 
-            Detalle_deduccion detalleDeduccion = new Detalle_deduccion();
+            if (salarioBruto > deduccion.getValor_deduccion()) {
 
-            detalleDeduccion.setDeduccion(deduccion);
-            detalleDeduccion.setDetalle_planilla(detallePlanilla);
+                if (puesto.getPuesto().getCategoria() == deduccion.getCategoria() || deduccion.getCategoria() == 0) {
+                    Detalle_deduccion detalleDeduccion = new Detalle_deduccion();
 
+                    detalleDeduccion.setDeduccion(deduccion);
+                    detalleDeduccion.setDetalle_planilla(detallePlanilla);
 
-            if (deduccion.isPorcentaje()) {
-                
-                // Si la deducción es un porcentaje, calcular el monto basado en el salario base
-                montoDeduccion = (salarioBruto * deduccion.getValor_deduccion()) / 100;
+                    if (deduccion.isPorcentaje()) {
+                        // Si la deducción es un porcentaje, calcular el monto basado en el salario base
+                        montoDeduccion = (salarioBruto * deduccion.getValor_deduccion()) / 100;
+                    } else {
+                        // Si la deducción es un monto fijo, restar el valor de la deducción al total
+                        montoDeduccion = salarioBruto - deduccion.getValor_deduccion();
+                    }
+                    detalleDeduccion.setMonto(montoDeduccion);
+                    sumaDeducciones += montoDeduccion;
+
+                    detalleDeduccionDao.save(detalleDeduccion);
+                }
 
             }
-            else {
-                // Si la deducción es un monto fijo, restar el valor de la deducción al total
-                montoDeduccion = salarioBruto - deduccion.getValor_deduccion();
-            }
-
-            detalleDeduccion.setMonto(montoDeduccion);
-
-
-
+            return sumaDeducciones;
         }
+        return sumaDeducciones;
+    }
 
+    //calcularPensiones
+    public double calcularPensiones(Long empleadoId , LocalDate fecha , double salario_bruto){
+
+        double acumulado_pensiones = 0.0;
+
+        List<Pension> pensiones = pensionDao.findAllPensionesActivasMes(fecha, empleadoId);
+        if(!pensiones.isEmpty()){
+            for (Pension pension : pensiones) {
+                if(pension.getPorcentaje() < salario_bruto){
+                    acumulado_pensiones = pension.getPorcentaje();
+                }
+            }
+
+            return acumulado_pensiones;
+        }
         return 0;
     }
-    
+
+    //calcularPuntosCarrera
+    public double calcularPuntosCarrera(Long empleadoId) {
+        return empleadoDao.getPuntosCarreraByEmpleadoId(empleadoId) * 3273;
+    }
+    //calcularPorcentajeDeRenta
+
     @Override
     public boolean generarDetallePlanilla(Detalle_planilla detallePlanilla) {
         throw new UnsupportedOperationException("Unimplemented method 'generarDetallePlanilla'");

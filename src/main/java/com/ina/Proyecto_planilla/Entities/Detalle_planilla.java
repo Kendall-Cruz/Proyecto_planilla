@@ -81,6 +81,8 @@ public class Detalle_planilla implements Serializable {
     @NotNull(message = "El monto subsidio renta no puede estar vacío")
     @Getter @Setter
     private double monto_subsidio;
+    @Getter @Setter
+    private double pagos;
 
     @OneToMany(mappedBy = "detalle_planilla")
     @Getter @Setter

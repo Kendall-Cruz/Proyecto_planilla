@@ -29,11 +29,15 @@ public interface IEmpleadoDao extends JpaRepository<Empleado, Long> {
     List<Empleado> findAllEmpleadoActivoEnMesSQL(@Param("fecha") LocalDate fecha);
 
     @Query(value = "SELECT SUM(DATEDIFF(DAY, pe.fecha_nombramiento, "
-            + "CASE WHEN pe.fecha_vence < CAST(GETDATE() AS DATE) THEN pe.fecha_vence ELSE CAST(GETDATE() AS DATE) END) + 1) "
-            + "AS dias_trabajados "
+            + "CASE WHEN pe.fecha_vence < GETDATE() THEN pe.fecha_vence ELSE GETDATE() END) + 1) "
             + "FROM Puestos_empleado pe "
-            + "WHERE pe.id_empleado = :empleadoId AND pe.borrado = 0",
+            + "WHERE pe.id_empleado = :empleadoId",
             nativeQuery = true)
-    Integer countTotalDiasTrabajados(@Param("empleadoId") Long empleadoId);
+    int countTotalDiasTrabajados(@Param("empleadoId") Long empleadoId);
+
+    @Query(value = "SELECT e.puntos_carrera "
+            + "FROM empleados e WHERE e.id_empleado = :empleadoId",
+            nativeQuery = true)
+    int getPuntosCarreraByEmpleadoId(@Param("empleadoId") Long empleadoId);
 
 }

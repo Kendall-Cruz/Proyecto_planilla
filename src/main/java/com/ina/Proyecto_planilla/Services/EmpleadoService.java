@@ -3,7 +3,6 @@ package com.ina.Proyecto_planilla.Services;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,11 +29,11 @@ public class EmpleadoService implements IEmpleadoService {
         LocalDate finMesAnterior = mesAnterior.atEndOfMonth();
 
         // Buscar el puesto activo en el mes anterior
-        Optional<Puesto_empleado> puestoActivo = empleadoDao.findActivePuestoByEmpleadoAndDate(
+        Puesto_empleado puestoActivo = empleadoDao.findActivePuestoByEmpleadoAndDate(
                 empleadoId, inicioMesAnterior);
 
-        if (puestoActivo.isPresent()) {
-            return puestoActivo.get().getPuesto().getSalario_base();
+        if (puestoActivo != null) {
+            return puestoActivo.getPuesto().getSalario_base();
         } else {
             return 0.0;
         }
