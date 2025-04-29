@@ -11,4 +11,6 @@ public interface IDeduccionDao extends JpaRepository<Deduccion, Long> {
     
     @Query("SELECT d FROM Deduccion d Where d.activo = 1")
     List<Deduccion> findAllDuccionesAct();
+
+    
 }

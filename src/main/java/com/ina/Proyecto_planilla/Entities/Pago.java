@@ -3,7 +3,6 @@ package com.ina.Proyecto_planilla.Entities;
 import java.io.Serializable;
 import java.util.List;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,9 +28,7 @@ public class Pago implements Serializable {
     @Size(max = 50, message = "El nombre del pago no puede exceder los 50 caracteres")
     private String nombre_pago;
 
-    @NotBlank(message = "El tipo de pago no puede estar vacío")
-    @Column(length = 15)
-    private String tipo_pago; // Puede ser "Fijo" o "Variable";
+    private boolean porcentaje;
 
     @NotNull(message = "El valor del pago no puede estar vacío")
     private double valor_pago; // Puede ser un monto fijo o un porcentaje del salario base
