@@ -28,5 +28,12 @@ public interface IEmpleadoDao extends JpaRepository<Empleado, Long> {
             + "AND pe.borrado = 0", nativeQuery = true)
     List<Empleado> findAllEmpleadoActivoEnMesSQL(@Param("fecha") LocalDate fecha);
 
+    @Query(value = "SELECT SUM(DATEDIFF(DAY, pe.fecha_nombramiento, "
+            + "CASE WHEN pe.fecha_vence < CAST(GETDATE() AS DATE) THEN pe.fecha_vence ELSE CAST(GETDATE() AS DATE) END) + 1) "
+            + "AS dias_trabajados "
+            + "FROM Puestos_empleado pe "
+            + "WHERE pe.id_empleado = :empleadoId AND pe.borrado = 0",
+            nativeQuery = true)
+    Integer countTotalDiasTrabajados(@Param("empleadoId") Long empleadoId);
 
 }

@@ -58,10 +58,11 @@ public class PlanillaService implements IPlanillaService {
                 //Subsidio  
                 detalle.setMonto_subsidio(verificarIncapacidades(empleado.getId_empleado(), planilla.getFecha_planilla(), salario_mes_pasado)); 
 
+                int dias_trabajados = empleadoDao.countTotalDiasTrabajados(empleado.getId_empleado());
+
                 //Aplicar pagos si el salario no es global
-                if(!puesto.getPuesto().isSalario_global()){
-
-
+                if(!puesto.getPuesto().isSalario_global()){ //Tiene que ser salario del mes actual
+                    detalle.setDeducciones(calcularDeducciones(detalle, salario_mes_pasado, dias_trabajados));
                 }
                 //Si no se aplican solo las deducciones
 
@@ -118,7 +119,7 @@ public class PlanillaService implements IPlanillaService {
         }
     }
 
-    public double calcularDeducciones(Detalle_planilla detallePlanilla, double salarioBruto) {
+    public double calcularDeducciones(Detalle_planilla detallePlanilla, double salarioBruto , int diasTrabajados) {
         List<Deduccion> deducciones = deduccionDao.findAllDuccionesAct();
         double montoDeduccion = 0.0;
         //int anios_trabajados = 0; // Variable para almacenar los años trabajados
