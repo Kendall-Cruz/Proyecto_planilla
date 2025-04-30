@@ -10,7 +10,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.ina.Proyecto_planilla.Dao.IEmpleadoDao;
 import com.ina.Proyecto_planilla.Dao.IPensionDao;
+import com.ina.Proyecto_planilla.Dao.IPorcentaje_rentaDao;
 import com.ina.Proyecto_planilla.Entities.Pension;
+import com.ina.Proyecto_planilla.Entities.Planilla;
+import com.ina.Proyecto_planilla.Entities.Porcentaje_renta;
 import com.ina.Proyecto_planilla.Services.PlanillaService;
 
 @SpringBootTest
@@ -26,6 +29,8 @@ class ProyectoPlanillaApplicationTests {
     private IEmpleadoDao empleadoDao;
     @Autowired
     private IPensionDao pensionDao;
+    @Autowired
+    private IPorcentaje_rentaDao porcentaje_rentaDao;
 
     @Test
     void testVerificarIncapacidad() {
@@ -52,9 +57,31 @@ class ProyectoPlanillaApplicationTests {
 
     @Test
     void testPensiones(){
-        List<Pension> pensiones = pensionDao.findAllPensionesActivasMes(LocalDate.of(2025, 04, 29), 1L);
+        List<Pension> pensiones = pensionDao.findAllPensionesActivasMes(LocalDate.of(2025, 03, 29), 1L);
         Assertions.assertTrue(pensiones.size() > 0);
     }
+
+    @Test
+    void testPorcentajesRenta(){
+        List<Porcentaje_renta> pr = porcentaje_rentaDao.getAllPorcentaje_renta("2025");
+
+        Assertions.assertTrue(pr.size() > 0);
+    }
     
+    @Test
+    void testPorcentajesRentaFunc(){
+        double resultado = planillaService.calcularPorcentajeDeRenta(4800000, LocalDate.now());
+
+        Assertions.assertTrue(resultado > 0);
+    }
+   /*  @Test 
+    void testGenerarPlanilla(){
+
+        Planilla planilla = new Planilla();
+        planilla.setFecha_creacion(LocalDate.now());
+        planilla.setFecha_pago_mensual(LocalDate.of("2025", "03", "29"));
+        
+        Long res = planillaService.generarPlanilla(planilla)
+    }*/
 
 }

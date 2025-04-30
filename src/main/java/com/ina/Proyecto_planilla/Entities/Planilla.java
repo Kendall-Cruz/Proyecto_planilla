@@ -35,10 +35,11 @@ public class Planilla implements Serializable {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull(message = "La fecha de pago mensual no puede estar vacía")
     private LocalDate fecha_pago_mensual;
-    
     @NotBlank(message = "El tipo de planilla no puede estar vacío")
     @Column(length = 20)
     private String tipo_planilla;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate fecha_creacion;
     
     @OneToMany(mappedBy = "planilla")
     private List<Detalle_planilla> detalles_planilla;

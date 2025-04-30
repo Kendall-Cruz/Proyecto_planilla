@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.ina.Proyecto_planilla.Entities.Detalle_planilla;
 import com.ina.Proyecto_planilla.Entities.Empleado;
 import com.ina.Proyecto_planilla.Entities.Planilla;
 import com.ina.Proyecto_planilla.Services.IEmpleadoService;
+import com.ina.Proyecto_planilla.Services.IPlanillaService;
 
 import jakarta.validation.Valid;
 
@@ -25,6 +27,8 @@ public class PlanillaController {
 
     @Autowired
     IEmpleadoService empleadoService;
+    @Autowired
+    IPlanillaService planillaService;
 
     @RequestMapping("/")
     public String index(Model model) {
@@ -67,14 +71,17 @@ public class PlanillaController {
     public String crearPlanilla(@Valid @ModelAttribute("planilla") Planilla planilla, BindingResult result, Model model) {
 
         if (result.hasErrors()) {
-            return "Planilla/crearPlanilla"; // Nombre del HTML
+            return "Planilla/crearPlanilla"; 
         }
 
-        
+        Long res = planillaService.generarPlanilla(planilla);
 
-
+        if(res > 0){
+            return "Planilla/crearPlanilla"; //Hay que redigir ya sea a la misma pagina pero cargando en la parte de abajo los detalles o crear una pagina solo para mostrar 
+        }
+        else
+            return "Planilla/crearPlanilla"; //Aqui se pondría el error
       
-        return "redirect:/planillas"; 
     }
 
 }

@@ -16,6 +16,7 @@ import com.ina.Proyecto_planilla.Dao.IIncapacidadDao;
 import com.ina.Proyecto_planilla.Dao.IPagoDao;
 import com.ina.Proyecto_planilla.Dao.IPensionDao;
 import com.ina.Proyecto_planilla.Dao.IPlanillaDao;
+import com.ina.Proyecto_planilla.Dao.IPorcentaje_rentaDao;
 import com.ina.Proyecto_planilla.Entities.Deduccion;
 import com.ina.Proyecto_planilla.Entities.Detalle_deduccion;
 import com.ina.Proyecto_planilla.Entities.Detalle_pago;
@@ -25,12 +26,17 @@ import com.ina.Proyecto_planilla.Entities.Incapacidad;
 import com.ina.Proyecto_planilla.Entities.Pago;
 import com.ina.Proyecto_planilla.Entities.Pension;
 import com.ina.Proyecto_planilla.Entities.Planilla;
+import com.ina.Proyecto_planilla.Entities.Porcentaje_renta;
 import com.ina.Proyecto_planilla.Entities.Puesto_empleado;
 
+import jakarta.persistence.Convert;
 import jakarta.transaction.Transactional;
 
 @Service
 public class PlanillaService implements IPlanillaService {
+
+    private final double MONTO_PUNTOS_CARRERA = 3375;
+    private final int MAX_DIAS_TRABAJADOS = 20;
 
     @Autowired
     private IEmpleadoService empleadoService;
@@ -50,48 +56,75 @@ public class PlanillaService implements IPlanillaService {
     private IDetalle_pagoDao detallePagoDao;
     @Autowired
     private IDetalle_deduccionDao detalleDeduccionDao;
-    @Autowired 
+    @Autowired
     private IPensionDao pensionDao;
+    @Autowired
+    private IPorcentaje_rentaDao porcentaje_rentaDao;
 
     @Transactional
     @Override
-    public boolean generarPlanilla(Planilla planilla) {
+    public Long generarPlanilla(Planilla planilla) {
         try {
 
             double salario_mes_pasado = 0.0;
-            double salario = 0;
-
+            double salario_bruto = 0;
             List<Empleado> empleados = empleadoService.findAllEmpleadoActivoFecha(planilla.getFecha_planilla());
+            planillaDao.save(planilla);
 
             for (Empleado empleado : empleados) {
 
+                //Se crea el detalle y se guarda con el empleado y la planilla predefinidos y sus otros valores en 0
                 Detalle_planilla detalle = new Detalle_planilla(empleado, planilla);
+                detallePlanillaDao.save(detalle);
+
+
                 Puesto_empleado puesto = empleadoDao.findActivePuestoByEmpleadoAndDate(empleado.getId_empleado(), planilla.getFecha_planilla()); //Puesto activo para la fecha de planilla
-                salario_mes_pasado = empleadoService.obtenerSalarioBaseMesAnterior(empleado.getId_empleado(), planilla.getFecha_planilla());
-                salario = puesto.getPuesto().getSalario_base(); //Salario_Bruto
-                int anios_trabajados = empleadoDao.countTotalDiasTrabajados(empleado.getId_empleado()) / 365;
+                salario_mes_pasado = empleadoService.obtenerSalarioBaseMesAnterior(empleado.getId_empleado(), planilla.getFecha_planilla()); //Salario del mes pasado a la fecha para la cual se quiere calcular la planilla
+                salario_bruto = puesto.getPuesto().getSalario_base(); //Salario_base
+                int anios_trabajados = empleadoDao.countTotalDiasTrabajados(empleado.getId_empleado()) / 365; //Años trabajados del empleado
 
                 // Verificar incapacidades
-                //Subsidio  
                 double subsidio = verificarIncapacidades(empleado.getId_empleado(), planilla.getFecha_planilla(), salario_mes_pasado);
                 detalle.setMonto_subsidio(subsidio == salario_mes_pasado ? salario_mes_pasado * 0.40 : subsidio);
+
+                //Verificar Permisos
 
                 //Aplicar pagos si el salario no es global
                 if (!puesto.getPuesto().isSalario_global()) { //Tiene que ser salario del mes actual
                     detalle.setPagos(calcularPagos(detalle, puesto, anios_trabajados));
-                    salario = salario + detalle.getPagos();
+                    
+                    salario_bruto += detalle.getPagos() + calcularPuntosCarrera(empleado.getId_empleado()); //Si era salario compuesto se le suman los pagos al salario base 
                 }
-                //Si no se aplican solo las deducciones                     //Equivale al salario_bruto
-                detalle.setDeducciones(calcularDeducciones(detalle, puesto, salario, anios_trabajados));
+
+                //Se guarda el salario bruto, si el puesto es global se toma el salario base como salario_bruto
+                detalle.setSalario_bruto(salario_bruto);
+
+                //Pensiones
+                detalle.setMonto_pensiones(calcularPensiones(empleado.getId_empleado(), planilla.getFecha_planilla(), salario_bruto));
+                salario_bruto = salario_bruto - detalle.getMonto_pensiones();
+
+                //Renta
+                detalle.setMonto_porcentaje_renta(calcularPorcentajeDeRenta(salario_bruto, planilla.getFecha_planilla()));
+                salario_bruto = salario_bruto - detalle.getMonto_porcentaje_renta();
+
+                //Deducciones
+                detalle.setDeducciones(calcularDeducciones(detalle, puesto, salario_bruto, anios_trabajados));
+                salario_bruto = salario_bruto - detalle.getDeducciones();
+
+
+                detalle.setSalario_neto(salario_bruto);
+
+                detalle.setAdelanto_quincenal((salario_bruto * 40) / 100) ;
+                detalle.setSalario_mensual((salario_bruto * 60 ) / 100);
 
                 detallePlanillaDao.save(detalle);
 
             }
 
-            return true;
+            return planilla.getId_planilla();
 
         } catch (Exception e) {
-            return false;
+            return 0L;
         }
     }
 
@@ -122,7 +155,7 @@ public class PlanillaService implements IPlanillaService {
     }
 
     public double calcularMontoIncapacidad(int diasIncapacidad, double salarioBase) {
-        double salarioDiario = salarioBase / 20;
+        double salarioDiario = salarioBase / MAX_DIAS_TRABAJADOS;
 
         if (diasIncapacidad > 3) {
             return (salarioDiario * diasIncapacidad) * 0.40;
@@ -199,7 +232,6 @@ public class PlanillaService implements IPlanillaService {
 
                     detalleDeduccionDao.save(detalleDeduccion);
                 }
-
             }
             return sumaDeducciones;
         }
@@ -207,18 +239,17 @@ public class PlanillaService implements IPlanillaService {
     }
 
     //calcularPensiones
-    public double calcularPensiones(Long empleadoId , LocalDate fecha , double salario_bruto){
+    public double calcularPensiones(Long empleadoId, LocalDate fecha, double salario_bruto) {
 
         double acumulado_pensiones = 0.0;
 
         List<Pension> pensiones = pensionDao.findAllPensionesActivasMes(fecha, empleadoId);
-        if(!pensiones.isEmpty()){
+        if (!pensiones.isEmpty()) {
             for (Pension pension : pensiones) {
-                if(pension.getPorcentaje() < salario_bruto){
-                    acumulado_pensiones = pension.getPorcentaje();
+                if (pension.getMonto_pension() < salario_bruto) {
+                    acumulado_pensiones = pension.getMonto_pension();
                 }
             }
-
             return acumulado_pensiones;
         }
         return 0;
@@ -226,9 +257,35 @@ public class PlanillaService implements IPlanillaService {
 
     //calcularPuntosCarrera
     public double calcularPuntosCarrera(Long empleadoId) {
-        return empleadoDao.getPuntosCarreraByEmpleadoId(empleadoId) * 3273;
+        return empleadoDao.getPuntosCarreraByEmpleadoId(empleadoId) * MONTO_PUNTOS_CARRERA;
     }
-    //calcularPorcentajeDeRenta
+
+    public double calcularPorcentajeDeRenta(double salario_bruto, LocalDate fecha_planilla) {
+
+        List<Porcentaje_renta> rublos = porcentaje_rentaDao.getAllPorcentaje_renta(String.valueOf(fecha_planilla.getYear()));
+        double monto_porcentaje_renta = 0;
+
+        for (Porcentaje_renta rublo : rublos) {
+            double topeMinimo = rublo.getTope_minimo();
+            double topeMaximo = rublo.getTope_maximo();
+            double porcentaje = rublo.getPorcentaje() / 100.0;
+
+            if (topeMaximo == 0 || salario_bruto < topeMaximo) {
+                
+                double base = salario_bruto - topeMinimo;
+                if (base > 0) {
+                    monto_porcentaje_renta += base * porcentaje;
+                }
+                break;
+            } else if (salario_bruto > topeMaximo) {
+               
+                double base = topeMaximo - topeMinimo;
+                monto_porcentaje_renta += base * porcentaje;
+            }
+        }
+
+        return monto_porcentaje_renta;
+    }
 
     @Override
     public boolean generarDetallePlanilla(Detalle_planilla detallePlanilla) {

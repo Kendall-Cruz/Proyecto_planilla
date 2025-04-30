@@ -35,6 +35,6 @@ public class Pension implements Serializable {
     @NotNull(message = "La fecha de vencimiento no puede estar vacía")
     private LocalDate fecha_vence;
     
-    @NotNull(message = "El porcentaje no puede estar vacío")
-    private double porcentaje;
+    @NotNull(message = "El monto de la pensión no puede estar vacío")
+    private double monto_pension;
 }

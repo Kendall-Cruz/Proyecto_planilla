@@ -27,7 +27,7 @@
         </div>
         <div class="row mt-5 text-center mx-auto card p-4 shadow-lg border-0">
             <div class="d-flex justify-content-center ">
-                <form th:object="${planilla}" method="post" class="row g-2 align-items-center">
+                <form th:action="@{/planillas/crearPlanilla}" th:object="${planilla}" method="post" class="row g-2 align-items-center">
 
                     <!-- Tipo Planilla -->
                     <div class="col-auto m-2">
