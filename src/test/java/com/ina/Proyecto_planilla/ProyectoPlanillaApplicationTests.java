@@ -74,14 +74,19 @@ class ProyectoPlanillaApplicationTests {
 
         Assertions.assertTrue(resultado > 0);
     }
-   /*  @Test 
+    @Test 
     void testGenerarPlanilla(){
 
         Planilla planilla = new Planilla();
         planilla.setFecha_creacion(LocalDate.now());
-        planilla.setFecha_pago_mensual(LocalDate.of("2025", "03", "29"));
+        planilla.setFecha_pago_mensual(LocalDate.of(2025, 3, 29));
+        planilla.setFecha_pago_quincenal(LocalDate.of(2025, 3, 15));
+        planilla.setFecha_planilla(LocalDate.of(2025, 3, 12));
+        planilla.setTipo_planilla("Ordinaria");
         
-        Long res = planillaService.generarPlanilla(planilla)
-    }*/
+        Long res = planillaService.generarPlanilla(planilla);
+
+        Assertions.assertTrue(res > 0);
+    }
 
 }

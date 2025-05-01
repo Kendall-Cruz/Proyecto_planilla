@@ -29,7 +29,6 @@ import com.ina.Proyecto_planilla.Entities.Planilla;
 import com.ina.Proyecto_planilla.Entities.Porcentaje_renta;
 import com.ina.Proyecto_planilla.Entities.Puesto_empleado;
 
-import jakarta.persistence.Convert;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -124,7 +123,7 @@ public class PlanillaService implements IPlanillaService {
             return planilla.getId_planilla();
 
         } catch (Exception e) {
-            return 0L;
+            throw e;
         }
     }
 

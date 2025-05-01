@@ -16,10 +16,12 @@ public interface IEmpleadoDao extends JpaRepository<Empleado, Long> {
 
     Empleado findById(long id);
 
-    @Query("SELECT pe FROM Puesto_empleado pe "
-            + "WHERE pe.empleado.id_empleado = :empleadoId "
-            + "AND :fecha BETWEEN pe.fecha_nombramiento AND pe.fecha_vence")
-    Puesto_empleado findActivePuestoByEmpleadoAndDate(@Param("empleadoId") Long empleadoId, @Param("fecha") LocalDate fecha);
+    @Query(value = "SELECT * FROM Puestos_empleado pe "
+            + "WHERE pe.id_empleado = :empleadoId "
+            + "AND MONTH(:fecha) BETWEEN MONTH(pe.fecha_nombramiento) AND MONTH(pe.fecha_vence) "
+            + "AND YEAR(:fecha) BETWEEN YEAR(pe.fecha_nombramiento) AND YEAR(pe.fecha_vence) "
+            + "AND pe.borrado = 0", nativeQuery = true)
+    Puesto_empleado findActivePuestoByEmpleadoAndDate(@Param("empleadoId") Long empleadoId,@Param("fecha") LocalDate fecha);
 
     @Query(value = "SELECT DISTINCT e.* FROM Puestos_empleado pe "
             + "JOIN Empleados e ON pe.id_empleado = e.id_empleado "
