@@ -76,22 +76,27 @@ public class PlanillaService implements IPlanillaService {
                 Detalle_planilla detalle = new Detalle_planilla(empleado, planilla);
                 detallePlanillaDao.save(detalle);
 
-
                 Puesto_empleado puesto = empleadoDao.findActivePuestoByEmpleadoAndDate(empleado.getId_empleado(), planilla.getFecha_planilla()); //Puesto activo para la fecha de planilla
                 salario_mes_pasado = empleadoService.obtenerSalarioBaseMesAnterior(empleado.getId_empleado(), planilla.getFecha_planilla()); //Salario del mes pasado a la fecha para la cual se quiere calcular la planilla
                 salario_bruto = puesto.getPuesto().getSalario_base(); //Salario_base
+                detalle.setSalario_base(puesto.getPuesto().getSalario_base());
                 int anios_trabajados = empleadoDao.countTotalDiasTrabajados(empleado.getId_empleado()) / 365; //Años trabajados del empleado
 
+                List<Incapacidad> incapacidades = incapacidadDao.findByEmpleadoIdAndFecha(empleado.getId_empleado(), planilla.getFecha_planilla()); //Incapacidades del empleado para la fecha de planilla
+
                 // Verificar incapacidades
-                double subsidio = verificarIncapacidades(empleado.getId_empleado(), planilla.getFecha_planilla(), salario_mes_pasado);
-                detalle.setMonto_subsidio(subsidio == salario_mes_pasado ? salario_mes_pasado * 0.40 : subsidio);
+                if (incapacidades.isEmpty()) {
+                    detalle.setMonto_subsidio(0.0); //Si no hay incapacidades se pone el subsidio en 0
+                } else {
+                    double subsidio = verificarIncapacidades(planilla.getFecha_planilla(), salario_mes_pasado, incapacidades); //Monto de subsidio por incapacidad
+                    detalle.setMonto_subsidio(subsidio == salario_mes_pasado ? salario_mes_pasado * 0.40 : subsidio);
+                }
 
                 //Verificar Permisos
-
                 //Aplicar pagos si el salario no es global
                 if (!puesto.getPuesto().isSalario_global()) { //Tiene que ser salario del mes actual
                     detalle.setPagos(calcularPagos(detalle, puesto, anios_trabajados));
-                    
+
                     salario_bruto += detalle.getPagos() + calcularPuntosCarrera(empleado.getId_empleado()); //Si era salario compuesto se le suman los pagos al salario base 
                 }
 
@@ -110,11 +115,10 @@ public class PlanillaService implements IPlanillaService {
                 detalle.setDeducciones(calcularDeducciones(detalle, puesto, salario_bruto, anios_trabajados));
                 salario_bruto = salario_bruto - detalle.getDeducciones();
 
-
                 detalle.setSalario_neto(salario_bruto);
 
-                detalle.setAdelanto_quincenal((salario_bruto * 40) / 100) ;
-                detalle.setSalario_mensual((salario_bruto * 60 ) / 100);
+                detalle.setAdelanto_quincenal((salario_bruto * 40) / 100);
+                detalle.setSalario_mensual((salario_bruto * 60) / 100);
 
                 detallePlanillaDao.save(detalle);
 
@@ -127,10 +131,7 @@ public class PlanillaService implements IPlanillaService {
         }
     }
 
-    @Override
-    public double verificarIncapacidades(Long empleadoId, LocalDate fechaPlanilla, double salarioBase) {
-
-        List<Incapacidad> incapacidades = incapacidadDao.findByEmpleadoIdAndFecha(empleadoId, fechaPlanilla);
+    public double verificarIncapacidades(LocalDate fechaPlanilla, double salarioBase, List<Incapacidad> incapacidades) {
 
         int totalDiasIncapacidad = 0;
 
@@ -246,7 +247,7 @@ public class PlanillaService implements IPlanillaService {
         if (!pensiones.isEmpty()) {
             for (Pension pension : pensiones) {
                 if (pension.getMonto_pension() < salario_bruto) {
-                    acumulado_pensiones = pension.getMonto_pension();
+                    acumulado_pensiones += pension.getMonto_pension();
                 }
             }
             return acumulado_pensiones;
@@ -270,14 +271,14 @@ public class PlanillaService implements IPlanillaService {
             double porcentaje = rublo.getPorcentaje() / 100.0;
 
             if (topeMaximo == 0 || salario_bruto < topeMaximo) {
-                
+
                 double base = salario_bruto - topeMinimo;
                 if (base > 0) {
                     monto_porcentaje_renta += base * porcentaje;
                 }
                 break;
             } else if (salario_bruto > topeMaximo) {
-               
+
                 double base = topeMaximo - topeMinimo;
                 monto_porcentaje_renta += base * porcentaje;
             }

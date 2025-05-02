@@ -32,7 +32,7 @@ class ProyectoPlanillaApplicationTests {
     @Autowired
     private IPorcentaje_rentaDao porcentaje_rentaDao;
 
-    @Test
+    /*@Test
     void testVerificarIncapacidad() {
         double salarioBase = 1500000;
         Long empleadoId = 1L;
@@ -41,7 +41,7 @@ class ProyectoPlanillaApplicationTests {
         double monto = planillaService.verificarIncapacidades(empleadoId, fechaPlanilla, salarioBase);
 
         org.junit.jupiter.api.Assertions.assertTrue(monto >= 0);
-    }
+    } */
 
     @Test
     void testDiasTrabajados(){

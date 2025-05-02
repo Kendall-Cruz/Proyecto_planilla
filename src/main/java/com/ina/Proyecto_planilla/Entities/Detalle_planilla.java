@@ -31,6 +31,10 @@ public class Detalle_planilla implements Serializable {
         this.salario_mensual = 0.0;
         this.retroactivo = 0.0;
         this.monto_porcentaje_renta = 0.0;
+        this.monto_pensiones = 0.0;
+        this.monto_subsidio = 0.0;
+        this.pagos = 0.0;
+        this.salario_base = 0.0;
     }
 
     @Id
@@ -47,6 +51,9 @@ public class Detalle_planilla implements Serializable {
     @JoinColumn(name = "id_empleado", nullable = false)
     @Getter @Setter
     private Empleado empleado; // Relación con Empleado
+
+    @Getter @Setter
+    private double salario_base; // Salario base del empleado para la planilla
 
     @NotNull(message = "El salario bruto no puede estar vacío")
     @Getter @Setter
