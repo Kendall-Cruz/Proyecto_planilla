@@ -193,7 +193,7 @@ public class PlanillaService implements IPlanillaService {
 
                     }
                 }
-                
+
                 if (montoPago > 0) {
                     sumaPagos += montoPago; // Sumar el monto del pago a la suma total  
                     detallePago.setMonto(montoPago);
@@ -228,16 +228,17 @@ public class PlanillaService implements IPlanillaService {
                         // Si la deducción es un porcentaje, calcular el monto basado en el salario base
                         montoDeduccion = (salarioBruto * deduccion.getValor_deduccion()) / 100;
                     } else {
-                        // Si la deducción es un monto fijo, restar el valor de la deducción al total
-                        montoDeduccion = salarioBruto - deduccion.getValor_deduccion();
+                        // Si la deducción es un monto fijo, solo usar el valor directamente
+                        montoDeduccion = deduccion.getValor_deduccion();
                     }
+                    
                     detalleDeduccion.setMonto(montoDeduccion);
                     sumaDeducciones += montoDeduccion;
 
                     detalleDeduccionDao.save(detalleDeduccion);
                 }
             }
-            return sumaDeducciones;
+            
         }
         return sumaDeducciones;
     }
