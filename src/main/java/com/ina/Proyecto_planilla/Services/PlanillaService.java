@@ -67,6 +67,7 @@ public class PlanillaService implements IPlanillaService {
 
             double salario_mes_pasado = 0.0;
             double salario_bruto = 0;
+            double subsidio = 0.0;
             List<Empleado> empleados = empleadoService.findAllEmpleadoActivoFecha(planilla.getFecha_planilla());
             planillaDao.save(planilla);
 
@@ -88,7 +89,7 @@ public class PlanillaService implements IPlanillaService {
                 if (incapacidades.isEmpty()) {
                     detalle.setMonto_subsidio(0.0); //Si no hay incapacidades se pone el subsidio en 0
                 } else {
-                    double subsidio = verificarIncapacidades(planilla.getFecha_planilla(), salario_mes_pasado, incapacidades); //Monto de subsidio por incapacidad
+                    subsidio = verificarIncapacidades(planilla.getFecha_planilla(), salario_mes_pasado, incapacidades); //Monto de subsidio por incapacidad
                     detalle.setMonto_subsidio(subsidio == salario_mes_pasado ? salario_mes_pasado * 0.40 : subsidio);
                 }
 
@@ -96,8 +97,8 @@ public class PlanillaService implements IPlanillaService {
                 //Aplicar pagos si el salario no es global
                 if (!puesto.getPuesto().isSalario_global()) { //Tiene que ser salario del mes actual
                     detalle.setPagos(calcularPagos(detalle, puesto, anios_trabajados));
-
-                    salario_bruto += detalle.getPagos() + calcularPuntosCarrera(empleado.getId_empleado()); //Si era salario compuesto se le suman los pagos al salario base 
+                    detalle.setMonto_puntos_carrera(calcularPuntosCarrera(empleado.getId_empleado()));
+                    salario_bruto += detalle.getPagos() + detalle.getMonto_puntos_carrera(); //Si era salario compuesto se le suman los pagos al salario base 
                 }
 
                 //Se guarda el salario bruto, si el puesto es global se toma el salario base como salario_bruto
@@ -115,7 +116,7 @@ public class PlanillaService implements IPlanillaService {
                 detalle.setDeducciones(calcularDeducciones(detalle, puesto, salario_bruto, anios_trabajados));
                 salario_bruto = salario_bruto - detalle.getDeducciones();
 
-                detalle.setSalario_neto(salario_bruto);
+                detalle.setSalario_neto(salario_bruto + subsidio); //Salario neto es el salario bruto menos las deducciones y más el subsidio por incapacidad en caso de que haya incapacidades
 
                 detalle.setAdelanto_quincenal((salario_bruto * 40) / 100);
                 detalle.setSalario_mensual((salario_bruto * 60) / 100);
@@ -192,12 +193,15 @@ public class PlanillaService implements IPlanillaService {
 
                     }
                 }
-                sumaPagos += montoPago; // Sumar el monto del pago a la suma total  
-
-                detallePago.setMonto(montoPago);
-
-                // Guardar el detalle del pago en la base de datos
-                detallePagoDao.save(detallePago);
+                
+                if (montoPago > 0) {
+                    sumaPagos += montoPago; // Sumar el monto del pago a la suma total  
+                    detallePago.setMonto(montoPago);
+                
+                    // Guardar el detalle del pago en la base de datos
+                    detallePagoDao.save(detallePago);
+                }
+                
             }
 
         }

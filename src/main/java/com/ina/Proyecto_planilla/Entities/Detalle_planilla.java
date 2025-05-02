@@ -33,6 +33,7 @@ public class Detalle_planilla implements Serializable {
         this.monto_porcentaje_renta = 0.0;
         this.monto_pensiones = 0.0;
         this.monto_subsidio = 0.0;
+        this.monto_puntos_carrera = 0.0;
         this.pagos = 0.0;
         this.salario_base = 0.0;
     }
@@ -88,6 +89,8 @@ public class Detalle_planilla implements Serializable {
     @NotNull(message = "El monto subsidio renta no puede estar vacío")
     @Getter @Setter
     private double monto_subsidio;
+    @Getter @Setter
+    private double monto_puntos_carrera;
     @Getter @Setter
     private double pagos;
 

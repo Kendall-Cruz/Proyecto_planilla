@@ -44,6 +44,13 @@ class ProyectoPlanillaApplicationTests {
     } */
 
     @Test
+    void testVerificarPuestoEmpleado() {
+        int anios = empleadoDao.countTotalDiasTrabajados(1L) / 365;
+
+        Assertions.assertNotNull(anios);
+    }
+
+    @Test
     void testDiasTrabajados(){
         long diasTrabajados = empleadoDao.countTotalDiasTrabajados(1L);
         Assertions.assertTrue(diasTrabajados > 0);
