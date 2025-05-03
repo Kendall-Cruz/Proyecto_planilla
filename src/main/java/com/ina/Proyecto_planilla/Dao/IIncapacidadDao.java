@@ -13,8 +13,8 @@ public interface IIncapacidadDao extends JpaRepository<Incapacidad, Long> {
 
     @Query(value = "SELECT * FROM dbo.Incapacidades i "
             + "WHERE i.id_empleado = :empleadoId "
-            + "AND i.fecha_inicio <= EOMONTH(:fecha) "
-            + "AND i.fecha_fin >= DATEFROMPARTS(YEAR(:fecha), MONTH(:fecha), 1)",
+            + "AND i.fecha_inicio <= EOMONTH(DATEADD(MONTH, -1, :fecha)) "
+            + "AND i.fecha_fin >= DATEFROMPARTS(YEAR(DATEADD(MONTH, -1, :fecha)), MONTH(DATEADD(MONTH, -1, :fecha)), 1)",
             nativeQuery = true)
     List<Incapacidad> findByEmpleadoIdAndFecha(@Param("empleadoId") Long empleadoId, @Param("fecha") LocalDate fecha);
 

@@ -64,7 +64,6 @@ public class PlanillaService implements IPlanillaService {
     @Override
     public Long generarPlanilla(Planilla planilla) {
         try {
-
             double salario_mes_pasado = 0.0;
             double salario_bruto = 0;
             double subsidio = 0.0;
@@ -72,78 +71,81 @@ public class PlanillaService implements IPlanillaService {
             planillaDao.save(planilla);
 
             for (Empleado empleado : empleados) {
-
                 //Se crea el detalle y se guarda con el empleado y la planilla predefinidos y sus otros valores en 0
                 Detalle_planilla detalle = new Detalle_planilla(empleado, planilla);
                 detallePlanillaDao.save(detalle);
 
-                Puesto_empleado puesto = empleadoDao.findActivePuestoByEmpleadoAndDate(empleado.getId_empleado(), planilla.getFecha_planilla()); //Puesto activo para la fecha de planilla
-                salario_mes_pasado = empleadoService.obtenerSalarioBaseMesAnterior(empleado.getId_empleado(), planilla.getFecha_planilla()); //Salario del mes pasado a la fecha para la cual se quiere calcular la planilla
-                salario_bruto = puesto.getPuesto().getSalario_base(); //Salario_base
+                Puesto_empleado puesto = empleadoDao.findActivePuestoByEmpleadoAndDate(empleado.getId_empleado(), planilla.getFecha_planilla());
+                salario_mes_pasado = empleadoService.obtenerSalarioBaseMesAnterior(empleado.getId_empleado(), planilla.getFecha_planilla());
+                salario_bruto = puesto.getPuesto().getSalario_base();
                 detalle.setSalario_base(puesto.getPuesto().getSalario_base());
-                int anios_trabajados = empleadoDao.countTotalDiasTrabajados(empleado.getId_empleado()) / 365; //Años trabajados del empleado
+                int anios_trabajados = empleadoDao.countTotalDiasTrabajados(empleado.getId_empleado()) / 365;
 
-                List<Incapacidad> incapacidades = incapacidadDao.findByEmpleadoIdAndFecha(empleado.getId_empleado(), planilla.getFecha_planilla()); //Incapacidades del empleado para la fecha de planilla
+                List<Incapacidad> incapacidades = incapacidadDao.findByEmpleadoIdAndFecha(empleado.getId_empleado(), planilla.getFecha_planilla());
 
                 // Verificar incapacidades
                 if (incapacidades.isEmpty()) {
-                    detalle.setMonto_subsidio(0.0); //Si no hay incapacidades se pone el subsidio en 0
+                    detalle.setMonto_subsidio(0.0);
                 } else {
-                    subsidio = verificarIncapacidades(planilla.getFecha_planilla(), salario_mes_pasado, incapacidades); //Monto de subsidio por incapacidad
+                    subsidio = verificarIncapacidades(planilla.getFecha_planilla(), salario_mes_pasado, incapacidades);
                     detalle.setMonto_subsidio(subsidio == salario_mes_pasado ? salario_mes_pasado * 0.40 : subsidio);
                 }
 
-                //Verificar Permisos
                 //Aplicar pagos si el salario no es global
-                if (!puesto.getPuesto().isSalario_global()) { //Tiene que ser salario del mes actual
+                if (!puesto.getPuesto().isSalario_global()) {
                     detalle.setPagos(calcularPagos(detalle, puesto, anios_trabajados));
                     detalle.setMonto_puntos_carrera(calcularPuntosCarrera(empleado.getId_empleado()));
-                    salario_bruto += detalle.getPagos() + detalle.getMonto_puntos_carrera(); //Si era salario compuesto se le suman los pagos al salario base 
+                    salario_bruto += detalle.getPagos() + detalle.getMonto_puntos_carrera();
                 }
 
-                //Se guarda el salario bruto, si el puesto es global se toma el salario base como salario_bruto
-                detalle.setSalario_bruto(salario_bruto);
+                // Guardar el salario bruto original antes de aplicar deducciones
+                double salario_bruto_original = salario_bruto;
+                detalle.setSalario_bruto(salario_bruto_original);
 
-                //Pensiones
+                // Calcular pensiones
                 detalle.setMonto_pensiones(calcularPensiones(empleado.getId_empleado(), planilla.getFecha_planilla(), salario_bruto));
                 salario_bruto = salario_bruto - detalle.getMonto_pensiones();
 
-                //Renta
+                // Calcular renta
                 detalle.setMonto_porcentaje_renta(calcularPorcentajeDeRenta(salario_bruto, planilla.getFecha_planilla()));
                 salario_bruto = salario_bruto - detalle.getMonto_porcentaje_renta();
 
-                //Deducciones
-                detalle.setDeducciones(calcularDeducciones(detalle, puesto, salario_bruto, anios_trabajados));
-                salario_bruto = salario_bruto - detalle.getDeducciones();
+                // Calcular deducciones
+                double deducciones = calcularDeducciones(detalle, puesto, salario_bruto, anios_trabajados);
+                detalle.setDeducciones(deducciones);
 
-                detalle.setSalario_neto(salario_bruto + subsidio); //Salario neto es el salario bruto menos las deducciones y más el subsidio por incapacidad en caso de que haya incapacidades
+                // El salario bruto ya fue reducido por las deducciones anteriores, así que aquí contiene el salario neto sin subsidio
+                salario_bruto = salario_bruto - deducciones;
 
-                detalle.setAdelanto_quincenal((salario_bruto * 40) / 100);
-                detalle.setSalario_mensual((salario_bruto * 60) / 100);
+                // Agregar el subsidio para obtener el salario neto final
+                detalle.setSalario_neto(salario_bruto + detalle.getMonto_subsidio());
+
+                detalle.setAdelanto_quincenal((detalle.getSalario_neto() * 40) / 100);
+                detalle.setSalario_mensual((detalle.getSalario_neto() * 60) / 100);
 
                 detallePlanillaDao.save(detalle);
-
             }
 
             return planilla.getId_planilla();
-
         } catch (Exception e) {
             throw e;
         }
     }
 
     public double verificarIncapacidades(LocalDate fechaPlanilla, double salarioBase, List<Incapacidad> incapacidades) {
-
         int totalDiasIncapacidad = 0;
 
-        // Definir el rango del mes
-        LocalDate primerDiaMes = fechaPlanilla.withDayOfMonth(1);
-        LocalDate ultimoDiaMes = fechaPlanilla.withDayOfMonth(fechaPlanilla.lengthOfMonth());
+        // Obtener el mes anterior
+        LocalDate fechaMesAnterior = fechaPlanilla.minusMonths(1);
+        // Definir el rango del mes anterior
+        LocalDate primerDiaMesAnterior = fechaMesAnterior.withDayOfMonth(1);
+        LocalDate ultimoDiaMesAnterior = fechaMesAnterior.withDayOfMonth(fechaMesAnterior.lengthOfMonth());
 
         for (Incapacidad incapacidad : incapacidades) {
-            // Limitar el rango de la incapacidad al mes
-            LocalDate inicio = incapacidad.getFecha_inicio().isBefore(primerDiaMes) ? primerDiaMes : incapacidad.getFecha_inicio();
-            LocalDate fin = incapacidad.getFecha_fin().isAfter(ultimoDiaMes) ? ultimoDiaMes : incapacidad.getFecha_fin();
+            // Limitar el rango de la incapacidad al mes anterior
+            LocalDate inicio = incapacidad.getFecha_inicio().isBefore(primerDiaMesAnterior) ? primerDiaMesAnterior : incapacidad.getFecha_inicio();
+
+            LocalDate fin = incapacidad.getFecha_fin().isAfter(ultimoDiaMesAnterior) ? ultimoDiaMesAnterior : incapacidad.getFecha_fin();
 
             int dias = (int) ChronoUnit.DAYS.between(inicio, fin) + 1;
 
@@ -197,11 +199,11 @@ public class PlanillaService implements IPlanillaService {
                 if (montoPago > 0) {
                     sumaPagos += montoPago; // Sumar el monto del pago a la suma total  
                     detallePago.setMonto(montoPago);
-                
+
                     // Guardar el detalle del pago en la base de datos
                     detallePagoDao.save(detallePago);
                 }
-                
+
             }
 
         }
@@ -231,14 +233,14 @@ public class PlanillaService implements IPlanillaService {
                         // Si la deducción es un monto fijo, solo usar el valor directamente
                         montoDeduccion = deduccion.getValor_deduccion();
                     }
-                    
+
                     detalleDeduccion.setMonto(montoDeduccion);
                     sumaDeducciones += montoDeduccion;
 
                     detalleDeduccionDao.save(detalleDeduccion);
                 }
             }
-            
+
         }
         return sumaDeducciones;
     }

@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.ina.Proyecto_planilla.Dao.IEmpleadoDao;
+import com.ina.Proyecto_planilla.Dao.IIncapacidadDao;
 import com.ina.Proyecto_planilla.Dao.IPensionDao;
 import com.ina.Proyecto_planilla.Dao.IPorcentaje_rentaDao;
+import com.ina.Proyecto_planilla.Entities.Incapacidad;
 import com.ina.Proyecto_planilla.Entities.Pension;
 import com.ina.Proyecto_planilla.Entities.Planilla;
 import com.ina.Proyecto_planilla.Entities.Porcentaje_renta;
@@ -31,17 +33,20 @@ class ProyectoPlanillaApplicationTests {
     private IPensionDao pensionDao;
     @Autowired
     private IPorcentaje_rentaDao porcentaje_rentaDao;
+    @Autowired
+    private IIncapacidadDao incapacidadDao;
 
-    /*@Test
+    @Test
     void testVerificarIncapacidad() {
-        double salarioBase = 1500000;
+        double salarioBase = 1800000;
         Long empleadoId = 1L;
-        LocalDate fechaPlanilla = LocalDate.of(2025, 4, 1);
+        LocalDate fechaPlanilla = LocalDate.of(2025, 3, 12);
+        List<Incapacidad> incapacidades = incapacidadDao.findByEmpleadoIdAndFecha(empleadoId, fechaPlanilla);
 
-        double monto = planillaService.verificarIncapacidades(empleadoId, fechaPlanilla, salarioBase);
+        double monto = planillaService.verificarIncapacidades(fechaPlanilla, salarioBase, incapacidades);
 
         org.junit.jupiter.api.Assertions.assertTrue(monto >= 0);
-    } */
+    } 
 
     @Test
     void testVerificarPuestoEmpleado() {
