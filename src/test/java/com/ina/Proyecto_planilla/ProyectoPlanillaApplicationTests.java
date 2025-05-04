@@ -8,14 +8,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.ina.Proyecto_planilla.Dao.IDetalle_planillaDao;
 import com.ina.Proyecto_planilla.Dao.IEmpleadoDao;
 import com.ina.Proyecto_planilla.Dao.IIncapacidadDao;
 import com.ina.Proyecto_planilla.Dao.IPensionDao;
 import com.ina.Proyecto_planilla.Dao.IPorcentaje_rentaDao;
+import com.ina.Proyecto_planilla.Dto.DetallePlanillaDTO;
 import com.ina.Proyecto_planilla.Entities.Incapacidad;
 import com.ina.Proyecto_planilla.Entities.Pension;
 import com.ina.Proyecto_planilla.Entities.Planilla;
 import com.ina.Proyecto_planilla.Entities.Porcentaje_renta;
+import com.ina.Proyecto_planilla.Services.DetallePlanillaService;
 import com.ina.Proyecto_planilla.Services.PlanillaService;
 
 @SpringBootTest
@@ -36,6 +39,11 @@ class ProyectoPlanillaApplicationTests {
     @Autowired
     private IIncapacidadDao incapacidadDao;
 
+    @Autowired
+    private IDetalle_planillaDao detallePlanillaDao;
+    @Autowired
+    private DetallePlanillaService detallePlanillaService;
+
     @Test
     void testVerificarIncapacidad() {
         double salarioBase = 1800000;
@@ -50,9 +58,11 @@ class ProyectoPlanillaApplicationTests {
 
     @Test
     void testVerificarPuestoEmpleado() {
-        int anios = empleadoDao.countTotalDiasTrabajados(1L) / 365;
+        List<DetallePlanillaDTO> detallesPlanilla = detallePlanillaService.obtenerDetallesPorPlanilla(4L);
 
-        Assertions.assertNotNull(anios);
+        
+
+        Assertions.assertNotNull(detallesPlanilla);
     }
 
     @Test
@@ -100,5 +110,6 @@ class ProyectoPlanillaApplicationTests {
 
         Assertions.assertTrue(res > 0);
     }
+
 
 }

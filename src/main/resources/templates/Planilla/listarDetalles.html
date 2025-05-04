@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="Layout/plantilla :: head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles de Planilla</title>
+</head>
+<body>
+    <header th:replace="Layout/plantilla :: header"></header>
+
+    <div class="container mt-4">
+        <!-- Payroll Information Card -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Información de Planilla</h3>
+            </div>
+            <div class="card-body text-dark">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>ID Planilla:</strong> <span th:text="${planilla.id_planilla}"></span></p>
+                        <p><strong>Tipo de Planilla:</strong> <span th:text="${planilla.tipo_planilla}"></span></p>
+                        <p><strong>Fecha de Creación:</strong> <span th:text="${#temporals.format(planilla.fecha_creacion, 'dd/MM/yyyy')}"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Fecha de Planilla:</strong> <span th:text="${#temporals.format(planilla.fecha_planilla, 'dd/MM/yyyy')}"></span></p>
+                        <p><strong>Fecha de Pago Quincenal:</strong> <span th:text="${#temporals.format(planilla.fecha_pago_quincenal, 'dd/MM/yyyy')}"></span></p>
+                        <p><strong>Fecha de Pago Mensual:</strong> <span th:text="${#temporals.format(planilla.fecha_pago_mensual, 'dd/MM/yyyy')}"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Details Table -->
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Detalles de la Planilla</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="detallePlanillaTable" class="table table-striped table-hover table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Empleado</th>
+                                <th>Salario Base</th>
+                                <th>Salario Bruto</th>
+                                <th>Deducciones</th>
+                                <th>Salario Neto</th>
+                                <th>Adelanto Quincenal</th>
+                                <th>Salario Mensual</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="detalle : ${detallesPlanilla}">
+                                <td th:text="${detalle.id_detalle_planilla}"></td>
+                                <td th:text="${detalle.nombre_empleado}"></td>
+                                <td th:text="${#numbers.formatDecimal(detalle.salario_base, 1, 2)}"></td>
+                                <td th:text="${#numbers.formatDecimal(detalle.salario_bruto, 1, 2)}"></td>
+                                <td th:text="${#numbers.formatDecimal(detalle.deducciones, 1, 2)}"></td>
+                                <td th:text="${#numbers.formatDecimal(detalle.salario_neto, 1, 2)}"></td>
+                                <td th:text="${#numbers.formatDecimal(detalle.adelanto_quincenal, 1, 2)}"></td>
+                                <td th:text="${#numbers.formatDecimal(detalle.salario_mensual, 1, 2)}"></td>
+                                <td>
+                                    <a th:href="@{/planilla/detalle/{id}(id=${detalle.id_detalle_planilla})}" class="btn btn-info btn-sm">
+                                        <i class="fas fa-eye"></i> Desglose
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Custom Scripts -->
+    <script>
+        $(document).ready(function() {
+            $('#detallePlanillaTable').DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                },
+                responsive: true,
+                pageLength: 5,
+                columnDefs: [
+                    { orderable: false, targets: 4 },
+                    { className: 'dt-center', targets: [1, 2, 3] },
+                    { className: 'text-start', targets: [0] }
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

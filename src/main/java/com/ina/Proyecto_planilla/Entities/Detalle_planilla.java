@@ -21,6 +21,22 @@ public class Detalle_planilla implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    // Constructor por defecto
+    public Detalle_planilla() {
+        this.salario_bruto = 0.0;
+        this.deducciones = 0.0;
+        this.salario_neto = 0.0;
+        this.adelanto_quincenal = 0.0;  
+        this.salario_mensual = 0.0;
+        this.retroactivo = 0.0;
+        this.monto_porcentaje_renta = 0.0;
+        this.monto_pensiones = 0.0;
+        this.monto_subsidio = 0.0;
+        this.monto_puntos_carrera = 0.0;
+        this.pagos = 0.0;
+        this.salario_base = 0.0;
+    }
+
     public Detalle_planilla(Empleado empleado, Planilla planilla) {
         this.empleado = empleado;
         this.planilla = planilla;

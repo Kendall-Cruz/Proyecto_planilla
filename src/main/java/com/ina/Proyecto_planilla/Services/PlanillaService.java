@@ -60,6 +60,12 @@ public class PlanillaService implements IPlanillaService {
     @Autowired
     private IPorcentaje_rentaDao porcentaje_rentaDao;
 
+
+    @Override
+    public Planilla obtenerPlanillaPorId(Long idPlanilla) {
+        return planillaDao.findById(idPlanilla).orElse(null);
+    }
+
     @Transactional
     @Override
     public Long generarPlanilla(Planilla planilla) {
@@ -294,9 +300,7 @@ public class PlanillaService implements IPlanillaService {
         return monto_porcentaje_renta;
     }
 
-    @Override
-    public boolean generarDetallePlanilla(Detalle_planilla detallePlanilla) {
-        throw new UnsupportedOperationException("Unimplemented method 'generarDetallePlanilla'");
-    }
+
+
 
 }
