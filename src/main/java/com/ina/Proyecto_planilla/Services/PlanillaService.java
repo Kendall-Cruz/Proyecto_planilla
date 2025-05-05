@@ -87,7 +87,6 @@ public class PlanillaService implements IPlanillaService {
                 double salarioMesPasado = empleadoService.obtenerSalarioBaseMesAnterior(empleado.getId_empleado(), planilla.getFecha_planilla());
                 double salarioBase = puesto.getPuesto().getSalario_base();
                 double subsidio = 0.0;
-                double salarioBruto = salarioBase;
 
                 // Se crea el detalle y se guarda con el empleado y la planilla predefinidos y sus otros valores en 0
                 Detalle_planilla detalle = new Detalle_planilla(empleado, planilla);
@@ -108,6 +107,7 @@ public class PlanillaService implements IPlanillaService {
                     detalle.setDias_incapacidad(diasIncapacidad - 3); // Restar los 3 días que no se pagan
                 }
 
+                // Permisos sin goce de salario
                 List<Permiso> permisos = permisoDao.obtenerPermisosSinGoceEmpleado(empleado.getId_empleado(), planilla.getFecha_planilla());
                 if (!permisos.isEmpty()) {
                     int totalDiasPermiso = verificarPermisosSinGoce(planilla.getFecha_planilla(), permisos);
