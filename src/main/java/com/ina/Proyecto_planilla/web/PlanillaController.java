@@ -103,5 +103,15 @@ public class PlanillaController {
 
         return "Planilla/listarDetalles";
     }
+    @GetMapping("/desglose/{id}")
+    public String mostrarDesglose(@PathVariable("id") Long idDetallePlanilla, Model model) {
+
+        DetallePlanillaDTO detalle = detallePlanillaService.obtenerDetallePorId(idDetallePlanilla);
+        model.addAttribute("detalle", detalle);
+
+        return "Planilla/desgloseDetallePlanilla";
+    }
+
+    
 
 }

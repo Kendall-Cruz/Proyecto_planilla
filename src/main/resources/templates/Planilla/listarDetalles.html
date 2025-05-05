@@ -62,7 +62,7 @@
                                 <td th:text="${#numbers.formatDecimal(detalle.adelantoQuincenal, 1, 2)}"></td>
                                 <td th:text="${#numbers.formatDecimal(detalle.salarioMensual, 1, 2)}"></td>
                                 <td>
-                                    <a th:href="@{/planilla/detalle/{id}(id=${detalle.idDetallePlanilla})}" class="btn btn-primary btn-sm">
+                                    <a th:href="@{/planillas/desglose/{id}(id=${detalle.idDetallePlanilla})}" class="btn btn-primary btn-sm">
                                         <i class="bi bi-file-text-fill"></i> Desglose
                                     </a>
                                 </td>

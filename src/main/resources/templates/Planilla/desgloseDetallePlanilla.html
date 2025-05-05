@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="Layout/plantilla :: head">
+    <meta charset="UTF-8">
+    <title>Detalle de Planilla</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<header th:replace="Layout/plantilla :: header"></header>
+
+<div class="container mt-4 mb-5">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2 class="fw-bold text-primary mb-2">Detalle de Planilla</h2>
+            
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <a th:href="@{/planillas/detalles/{id}(id=${detalle.idPlanilla})}" class="btn btn-outline-primary">
+                Volver a planilla #<span th:text="${detalle.idPlanilla}"></span>
+            </a>
+        </div>
+    </div>
+
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="card-title mb-0">Asistencia</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="p-3 rounded bg-light">
+                        <label class="form-label text-muted small"> Empleado </label>
+                        <p class="text-muted mb-0">
+                            <span class="fw-bold" th:text="${detalle.nombreEmpleado}">Nombre Empleado</span> 
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="p-3 rounded bg-light">
+                        <label class="form-label text-muted small">Días de Incapacidad</label>
+                        <p class="fw-bold fs-5 mb-0" th:text="${20 - detalle.diasTrabajados - detalle.diasPermisoSinGoce}">0</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="p-3 rounded bg-light">
+                        <label class="form-label text-muted small">Días de Permiso Sin Goce</label>
+                        <p class="fw-bold fs-5 mb-0" th:text="${detalle.diasPermisoSinGoce}">0</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="p-3 rounded bg-success bg-opacity-10">
+                        <label class="form-label text-muted small">Días Trabajados</label>
+                        <p class="fw-bold fs-5 mb-0 text-success" th:text="${detalle.diasTrabajados}">20</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0">Resumen Salarial</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-2 mb-3">
+                    <div class="p-3 rounded bg-light">
+                        <label class="form-label text-muted small">Salario Base</label>
+                        <p class="fw-bold fs-5 mb-0" th:text="'₡' + ${detalle.salarioBase}">Base</p>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="p-3 rounded bg-light">
+                        <label class="form-label text-muted small">Salario Proporcional</label>
+                        <p class="fw-bold fs-5 mb-0 text-info" th:text="'₡' + ${detalle.salarioProporcional}">Proporcional</p>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="p-3 rounded bg-light">
+                        <label class="form-label text-muted small">Pagos</label>
+                        <p class="fw-bold fs-5 mb-0 text-success" th:text="'₡' + ${detalle.pagos}">Pagos</p>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="p-3 rounded bg-light">
+                        <label class="form-label text-muted small">Salario Bruto</label>
+                        <p class="fw-bold fs-5 mb-0" th:text="'₡' + ${detalle.salarioBruto}">Bruto</p>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="p-3 rounded bg-light">
+                        <label class="form-label text-muted small">Deducciones</label>
+                        <p class="fw-bold fs-5 mb-0 text-danger" th:text="'₡' + ${detalle.deducciones}">Deducciones</p>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="p-3 rounded bg-success bg-opacity-10">
+                        <label class="form-label text-muted small">Salario Neto</label>
+                        <p class="fw-bold fs-5 mb-0 text-success" th:text="'₡' + ${detalle.salarioNeto}">Neto</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="card-title mb-0">Detalles Adicionales</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label text-muted small">Adelanto Quincenal</label>
+                    <p class="fw-bold" th:text="'₡' + ${detalle.adelantoQuincenal}">Adelanto</p>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label text-muted small">Salario Mensual</label>
+                    <p class="fw-bold" th:text="'₡' + ${detalle.salarioMensual}">Salario Mensual</p>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label text-muted small">Retroactivo</label>
+                    <p class="fw-bold" th:text="'₡' + ${detalle.retroactivo}">Retroactivo</p>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label text-muted small">% Renta</label>
+                    <p class="fw-bold" th:text="'₡' + ${detalle.porcentajeRenta}">Renta</p>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label text-muted small">Monto Pensiones</label>
+                    <p class="fw-bold" th:text="'₡' + ${detalle.montoPensiones}">Pensiones</p>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label text-muted small">Subsidio</label>
+                    <p class="fw-bold" th:text="'₡' + ${detalle.montoSubsidio}">Subsidio</p>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label text-muted small">Puntos Carrera</label>
+                    <p class="fw-bold" th:text="'₡' + ${detalle.montoPuntosCarrera}">Puntos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">Deducciones</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th>Nombre Deducción</th>
+                                <th class="text-end">Monto</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="deduccion : ${detalle.detallesDeducciones}">
+                                <td th:text="${deduccion.deduccion.nombre_deduccion}">Nombre</td>
+                                <td class="text-end" th:text="'₡' + ${#numbers.formatDecimal(deduccion.monto, 1, 'COMMA', 2, 'POINT')}">Monto</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(detalle.detallesDeducciones)}">
+                                <td colspan="2" class="text-center">No hay deducciones registradas</td>
+                            </tr>
+                            <tr class="table-danger" th:if="${!#lists.isEmpty(detalle.detallesDeducciones)}">
+                                <td class="fw-bold">Total</td>
+                                <td class="text-end fw-bold" th:text="'₡' + ${detalle.deducciones}">Total</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">Pagos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th>Nombre Pago</th>
+                                <th class="text-end">Monto</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="pago : ${detalle.detallePagos}">
+                                <td th:text="${pago.pago.nombre_pago}">Nombre</td>
+                                <td class="text-end" th:text="'₡' + ${#numbers.formatDecimal(pago.monto, 1, 'COMMA', 2, 'POINT')}">Monto</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(detalle.detallePagos)}">
+                                <td colspan="2" class="text-center">No hay pagos registrados</td>
+                            </tr>
+                            <tr class="table-success" th:if="${!#lists.isEmpty(detalle.detallePagos)}">
+                                <td class="fw-bold">Total</td>
+                                <td class="text-end fw-bold" th:text="'₡' + ${detalle.pagos}">Total</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text-center">
+        <a th:href="@{/planillas/detalles/{id}(id=${detalle.idPlanilla})}" class="btn btn-primary">
+            Volver a la planilla
+        </a>
+    </div>
+</div>
+</body>
+</html>

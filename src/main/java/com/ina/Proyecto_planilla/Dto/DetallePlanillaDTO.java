@@ -16,6 +16,7 @@ public class DetallePlanillaDTO {
     private String nombreEmpleado;
     private Long idPlanilla;
     private double salarioBase;
+    private double salarioProporcional;
     private double salarioBruto;
     private double deducciones;
     private double salarioNeto;
@@ -27,6 +28,8 @@ public class DetallePlanillaDTO {
     private double montoSubsidio;
     private double montoPuntosCarrera;
     private double pagos;
+    private int diasTrabajados;
+    private int diasPermisoSinGoce;
 
     // Listas relacionadas
     private List<Detalle_deduccion> detallesDeducciones;

@@ -72,43 +72,57 @@ public class Detalle_planilla implements Serializable {
     @Getter @Setter
     private double salario_base; // Salario base del empleado para la planilla
 
-    @NotNull(message = "El salario bruto no puede estar vacío")
+    @Getter @Setter
+    private double salario_proporcional;
+
+    @NotNull
     @Getter @Setter
     private double salario_bruto;
 
-    @NotNull(message = "Las deducciones no pueden estar vacías")
+    @NotNull
     @Getter @Setter
     private double deducciones;
 
-    @NotNull(message = "El salario neto no puede estar vacío")
+    @NotNull
     @Getter @Setter
     private double salario_neto;
 
-    @NotNull(message = "El adelanto quincenal no puede estar vacío")
+    @NotNull
     @Getter @Setter
     private double adelanto_quincenal;
 
-    @NotNull(message = "El salario mensual no puede estar vacío")
+    @NotNull
     @Getter @Setter
     private double salario_mensual;
 
-    @NotNull(message = "El retroactivo no puede estar vacío")
+    @NotNull
     @Getter @Setter
     private double retroactivo;
 
-    @NotNull(message = "El monto porcentaje renta no puede estar vacío")
+    @NotNull
     @Getter @Setter
     private double monto_porcentaje_renta;
-    @NotNull(message = "El monto pensiones no puede estar vacío")
+
+    @NotNull
     @Getter @Setter
     private double monto_pensiones;
-    @NotNull(message = "El monto subsidio renta no puede estar vacío")
+
+    @NotNull
     @Getter @Setter
     private double monto_subsidio;
+
     @Getter @Setter
     private double monto_puntos_carrera;
+
     @Getter @Setter
     private double pagos;
+
+    @Getter @Setter
+    private int dias_incapacidad; 
+
+    @Getter @Setter
+    private int dias_permiso_sin_goce;
+    
 
     @OneToMany(mappedBy = "detalle_planilla")
     @Getter @Setter

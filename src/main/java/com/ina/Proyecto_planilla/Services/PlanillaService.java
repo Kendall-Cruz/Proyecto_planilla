@@ -15,6 +15,7 @@ import com.ina.Proyecto_planilla.Dao.IEmpleadoDao;
 import com.ina.Proyecto_planilla.Dao.IIncapacidadDao;
 import com.ina.Proyecto_planilla.Dao.IPagoDao;
 import com.ina.Proyecto_planilla.Dao.IPensionDao;
+import com.ina.Proyecto_planilla.Dao.IPermisoDao;
 import com.ina.Proyecto_planilla.Dao.IPlanillaDao;
 import com.ina.Proyecto_planilla.Dao.IPorcentaje_rentaDao;
 import com.ina.Proyecto_planilla.Entities.Deduccion;
@@ -25,6 +26,7 @@ import com.ina.Proyecto_planilla.Entities.Empleado;
 import com.ina.Proyecto_planilla.Entities.Incapacidad;
 import com.ina.Proyecto_planilla.Entities.Pago;
 import com.ina.Proyecto_planilla.Entities.Pension;
+import com.ina.Proyecto_planilla.Entities.Permiso;
 import com.ina.Proyecto_planilla.Entities.Planilla;
 import com.ina.Proyecto_planilla.Entities.Porcentaje_renta;
 import com.ina.Proyecto_planilla.Entities.Puesto_empleado;
@@ -58,6 +60,8 @@ public class PlanillaService implements IPlanillaService {
     @Autowired
     private IPensionDao pensionDao;
     @Autowired
+    private IPermisoDao permisoDao;
+    @Autowired
     private IPorcentaje_rentaDao porcentaje_rentaDao;
 
     @Override
@@ -85,12 +89,12 @@ public class PlanillaService implements IPlanillaService {
                 double subsidio = 0.0;
                 double salarioBruto = salarioBase;
 
-                // Crear detalle con salario base
+                // Se crea el detalle y se guarda con el empleado y la planilla predefinidos y sus otros valores en 0
                 Detalle_planilla detalle = new Detalle_planilla(empleado, planilla);
                 detallePlanillaDao.save(detalle);
-                
-                detalle.setSalario_base(salarioBase);
 
+                detalle.setSalario_base(salarioBase);
+                // Calcular años trabajados
                 int aniosTrabajados = empleadoDao.countTotalDiasTrabajados(empleado.getId_empleado()) / 365;
 
                 List<Incapacidad> incapacidades = incapacidadDao.findByEmpleadoIdAndFecha(empleado.getId_empleado(), planilla.getFecha_planilla());
@@ -98,9 +102,29 @@ public class PlanillaService implements IPlanillaService {
                 if (incapacidades.isEmpty()) {
                     detalle.setMonto_subsidio(0.0);
                 } else {
-                    subsidio = verificarIncapacidades(planilla.getFecha_planilla(), salarioMesPasado, incapacidades);
-                    detalle.setMonto_subsidio(subsidio == salarioMesPasado ? salarioMesPasado * 0.40 : subsidio);
+                    int diasIncapacidad = verificarIncapacidades(planilla.getFecha_planilla(), incapacidades); 
+                    subsidio = calcularMontoIncapacidad(diasIncapacidad, salarioMesPasado);
+                    detalle.setMonto_subsidio(subsidio); 
+                    detalle.setDias_incapacidad(diasIncapacidad - 3); // Restar los 3 días que no se pagan
                 }
+
+                List<Permiso> permisos = permisoDao.obtenerPermisosSinGoceEmpleado(empleado.getId_empleado(), planilla.getFecha_planilla());
+                if (!permisos.isEmpty()) {
+                    int totalDiasPermiso = verificarPermisosSinGoce(planilla.getFecha_planilla(), permisos);
+                    if(totalDiasPermiso >= 20) {
+                        continue;
+                    } else {
+                        detalle.setDias_permiso_sin_goce(totalDiasPermiso);
+                    }
+
+                }
+
+                //Sacar el salario proporcional
+                double salarioDiario = salarioBase / MAX_DIAS_TRABAJADOS;
+                int dias_trabajados = MAX_DIAS_TRABAJADOS - (detalle.getDias_incapacidad() + detalle.getDias_permiso_sin_goce());
+                detalle.setSalario_proporcional(salarioDiario * dias_trabajados);
+
+                double salarioProporcional = detalle.getSalario_proporcional();
 
                 // Pagos adicionales si NO es salario global
                 if (!puesto.getPuesto().isSalario_global()) {
@@ -110,32 +134,31 @@ public class PlanillaService implements IPlanillaService {
                     detalle.setPagos(pagos);
                     detalle.setMonto_puntos_carrera(puntosCarrera);
 
-                    salarioBruto += pagos + puntosCarrera;
+                    salarioProporcional += pagos + puntosCarrera;
                 }
 
-                // Guardar el salario bruto original
-                detalle.setSalario_bruto(salarioBruto);
+                detalle.setSalario_bruto(salarioProporcional);
 
                 // Pensiones
-                double montoPensiones = calcularPensiones(empleado.getId_empleado(), planilla.getFecha_planilla(), salarioBruto);
+                double montoPensiones = calcularPensiones(empleado.getId_empleado(), planilla.getFecha_planilla(), salarioProporcional);
                 detalle.setMonto_pensiones(montoPensiones);
-                salarioBruto -= montoPensiones;
+                salarioProporcional -= montoPensiones;
 
                 // Porcentaje de renta
-                double montoRenta = calcularPorcentajeDeRenta(salarioBruto, planilla.getFecha_planilla());
+                double montoRenta = calcularPorcentajeDeRenta(salarioProporcional, planilla.getFecha_planilla());
                 detalle.setMonto_porcentaje_renta(montoRenta);
-                salarioBruto -= montoRenta;
+                salarioProporcional -= montoRenta;
 
                 // Otras deducciones
-                double deducciones = calcularDeducciones(detalle, puesto, salarioBruto, aniosTrabajados);
+                double deducciones = calcularDeducciones(detalle, puesto, salarioProporcional, aniosTrabajados);
                 detalle.setDeducciones(deducciones);
-                salarioBruto -= deducciones;
+                salarioProporcional -= deducciones;
 
-                // Salario neto (ya con subsidio)
-                double salarioNeto = salarioBruto + detalle.getMonto_subsidio();
+                // Salario neto
+                double salarioNeto = salarioProporcional + detalle.getMonto_subsidio();
                 detalle.setSalario_neto(salarioNeto);
 
-                // Distribución quincenal y mensual
+                
                 detalle.setAdelanto_quincenal((salarioNeto * 40) / 100);
                 detalle.setSalario_mensual((salarioNeto * 60) / 100);
 
@@ -150,79 +173,30 @@ public class PlanillaService implements IPlanillaService {
         }
     }
 
-    /*   
-    @Transactional
-    @Override
-    public Long generarPlanilla(Planilla planilla) {
-        try {
-            double salario_mes_pasado = 0.0;
-            double salario_bruto = 0;
-            double subsidio = 0.0;
-            List<Empleado> empleados = empleadoService.findAllEmpleadoActivoFecha(planilla.getFecha_planilla());
-            planillaDao.save(planilla);
+   
+    public int verificarPermisosSinGoce(LocalDate fechaPlanilla, List<Permiso> permisos) {
+        int totalDiasPermiso = 0;
 
-            for (Empleado empleado : empleados) {
-                //Se crea el detalle y se guarda con el empleado y la planilla predefinidos y sus otros valores en 0
-                Detalle_planilla detalle = new Detalle_planilla(empleado, planilla);
-                detallePlanillaDao.save(detalle);
+        // Obtener el mes anterior
+        LocalDate fechaMesAnterior = fechaPlanilla.minusMonths(1);
+        LocalDate primerDiaMesAnterior = fechaMesAnterior.withDayOfMonth(1);
+        LocalDate ultimoDiaMesAnterior = fechaMesAnterior.withDayOfMonth(fechaMesAnterior.lengthOfMonth());
 
-                Puesto_empleado puesto = empleadoDao.findActivePuestoByEmpleadoAndDate(empleado.getId_empleado(), planilla.getFecha_planilla());
-                salario_mes_pasado = empleadoService.obtenerSalarioBaseMesAnterior(empleado.getId_empleado(), planilla.getFecha_planilla());
-                salario_bruto = puesto.getPuesto().getSalario_base();
-                detalle.setSalario_base(puesto.getPuesto().getSalario_base());
-                int anios_trabajados = empleadoDao.countTotalDiasTrabajados(empleado.getId_empleado()) / 365;
+        for (Permiso permiso : permisos) {
+            LocalDate inicio = permiso.getFecha_inicio().isBefore(primerDiaMesAnterior) ? primerDiaMesAnterior : permiso.getFecha_inicio();
+            LocalDate fin = permiso.getFecha_fin().isAfter(ultimoDiaMesAnterior) ? ultimoDiaMesAnterior : permiso.getFecha_fin();
 
-                List<Incapacidad> incapacidades = incapacidadDao.findByEmpleadoIdAndFecha(empleado.getId_empleado(), planilla.getFecha_planilla());
+            int dias = (int) ChronoUnit.DAYS.between(inicio, fin) + 1;
 
-                // Verificar incapacidades
-                if (incapacidades.isEmpty()) {
-                    detalle.setMonto_subsidio(0.0);
-                } else {
-                    subsidio = verificarIncapacidades(planilla.getFecha_planilla(), salario_mes_pasado, incapacidades);
-                    detalle.setMonto_subsidio(subsidio == salario_mes_pasado ? salario_mes_pasado * 0.40 : subsidio);
-                }
-
-                //Aplicar pagos si el salario no es global
-                if (!puesto.getPuesto().isSalario_global()) {
-                    detalle.setPagos(calcularPagos(detalle, puesto, anios_trabajados));
-                    detalle.setMonto_puntos_carrera(calcularPuntosCarrera(empleado.getId_empleado()));
-                    salario_bruto += detalle.getPagos() + detalle.getMonto_puntos_carrera();
-                }
-
-                // Guardar el salario bruto original antes de aplicar deducciones
-                double salario_bruto_original = salario_bruto;
-                detalle.setSalario_bruto(salario_bruto_original);
-
-                // Calcular pensiones
-                detalle.setMonto_pensiones(calcularPensiones(empleado.getId_empleado(), planilla.getFecha_planilla(), salario_bruto));
-                salario_bruto = salario_bruto - detalle.getMonto_pensiones();
-
-                // Calcular renta
-                detalle.setMonto_porcentaje_renta(calcularPorcentajeDeRenta(salario_bruto, planilla.getFecha_planilla()));
-                salario_bruto = salario_bruto - detalle.getMonto_porcentaje_renta();
-
-                // Calcular deducciones
-                double deducciones = calcularDeducciones(detalle, puesto, salario_bruto, anios_trabajados);
-                detalle.setDeducciones(deducciones);
-
-                // El salario bruto ya fue reducido por las deducciones anteriores, así que aquí contiene el salario neto sin subsidio
-                salario_bruto = salario_bruto - deducciones;
-
-                // Agregar el subsidio para obtener el salario neto final
-                detalle.setSalario_neto(salario_bruto + detalle.getMonto_subsidio());
-
-                detalle.setAdelanto_quincenal((detalle.getSalario_neto() * 40) / 100);
-                detalle.setSalario_mensual((detalle.getSalario_neto() * 60) / 100);
-
-                detallePlanillaDao.save(detalle);
+            if (dias > 0) {
+                totalDiasPermiso += dias;
             }
-
-            return planilla.getId_planilla();
-        } catch (Exception e) {
-            throw e;
         }
-    }*/
-    public double verificarIncapacidades(LocalDate fechaPlanilla, double salarioBase, List<Incapacidad> incapacidades) {
+
+        return totalDiasPermiso;
+    }
+
+    public int verificarIncapacidades(LocalDate fechaPlanilla, List<Incapacidad> incapacidades) {
         int totalDiasIncapacidad = 0;
 
         // Obtener el mes anterior
@@ -244,16 +218,21 @@ public class PlanillaService implements IPlanillaService {
             }
         }
 
-        return calcularMontoIncapacidad(totalDiasIncapacidad, salarioBase);
+        return totalDiasIncapacidad;
     }
 
     public double calcularMontoIncapacidad(int diasIncapacidad, double salarioBase) {
         double salarioDiario = salarioBase / MAX_DIAS_TRABAJADOS;
-
-        if (diasIncapacidad > 3) {
-            return (salarioDiario * diasIncapacidad) * 0.40;
+    
+        if (diasIncapacidad <= 3) {
+            // Pagar los primeros días de incapacidad al 100%
+            return salarioDiario * diasIncapacidad;
         } else {
-            return salarioBase;
+            // Pagar los primeros 3 días al 100%
+            int diasSubsidiados = diasIncapacidad - 3;
+            double subsidio = (salarioDiario * diasSubsidiados) * 0.40;
+    
+            return (salarioDiario * 3) + subsidio;
         }
     }
 

@@ -30,6 +30,7 @@ public class DetallePlanillaService implements IDetallePlanillaService {
                 detalle.getEmpleado().getNombre() + " " + detalle.getEmpleado().getApellido1() + " " + detalle.getEmpleado().getApellido2(),
                 detalle.getPlanilla().getId_planilla(),
                 detalle.getSalario_base(),
+                detalle.getSalario_proporcional(),
                 detalle.getSalario_bruto(),
                 detalle.getDeducciones(),
                 detalle.getSalario_neto(),
@@ -41,9 +42,43 @@ public class DetallePlanillaService implements IDetallePlanillaService {
                 detalle.getMonto_subsidio(),
                 detalle.getMonto_puntos_carrera(),
                 detalle.getPagos(),
+                detalle.getDias_incapacidad(),
+                detalle.getDias_permiso_sin_goce(),
                 detalle.getDetalles_deducciones(),
                 detalle.getDetalle_pagos()
         )).toList();
+    }
+
+    @Override
+    public DetallePlanillaDTO obtenerDetallePorId(Long idDetallePlanilla) {
+        Detalle_planilla detalle = detallePlanillaDao.findById_detalle_planilla(idDetallePlanilla);
+
+        detalle.getDetalle_pagos().size();
+        detalle.getDetalles_deducciones().size();
+
+        return new DetallePlanillaDTO(
+                detalle.getId_detalle_planilla(),
+                detalle.getEmpleado().getId_empleado(),
+                detalle.getEmpleado().getNombre() + " " + detalle.getEmpleado().getApellido1() + " " + detalle.getEmpleado().getApellido2(),
+                detalle.getPlanilla().getId_planilla(),
+                detalle.getSalario_base(),
+                detalle.getSalario_proporcional(),
+                detalle.getSalario_bruto(),
+                detalle.getDeducciones(),
+                detalle.getSalario_neto(),
+                detalle.getAdelanto_quincenal(),
+                detalle.getSalario_mensual(),
+                detalle.getRetroactivo(),
+                detalle.getMonto_porcentaje_renta(),
+                detalle.getMonto_pensiones(),
+                detalle.getMonto_subsidio(),
+                detalle.getMonto_puntos_carrera(),
+                detalle.getPagos(),
+                detalle.getDias_incapacidad(),
+                detalle.getDias_permiso_sin_goce(),
+                detalle.getDetalles_deducciones(),
+                detalle.getDetalle_pagos()
+        );
     }
 
 }

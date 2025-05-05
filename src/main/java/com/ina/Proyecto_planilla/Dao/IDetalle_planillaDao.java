@@ -20,4 +20,9 @@ public interface IDetalle_planillaDao extends JpaRepository<Detalle_planilla, Lo
     @Query("SELECT d FROM Detalle_planilla d "
             + "WHERE d.planilla.id_planilla = :idPlanilla")
     List<Detalle_planilla> findAllByPlanillaid_Planilla(Long idPlanilla);
+
+    @Query("SELECT d FROM Detalle_planilla d WHERE d.id_detalle_planilla = :id")
+    Detalle_planilla findById_detalle_planilla(@Param("id") Long id);
+
+
 }

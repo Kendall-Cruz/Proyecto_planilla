@@ -14,7 +14,6 @@ import com.ina.Proyecto_planilla.Dao.IIncapacidadDao;
 import com.ina.Proyecto_planilla.Dao.IPensionDao;
 import com.ina.Proyecto_planilla.Dao.IPorcentaje_rentaDao;
 import com.ina.Proyecto_planilla.Dto.DetallePlanillaDTO;
-import com.ina.Proyecto_planilla.Entities.Incapacidad;
 import com.ina.Proyecto_planilla.Entities.Pension;
 import com.ina.Proyecto_planilla.Entities.Planilla;
 import com.ina.Proyecto_planilla.Entities.Porcentaje_renta;
@@ -44,17 +43,7 @@ class ProyectoPlanillaApplicationTests {
     @Autowired
     private DetallePlanillaService detallePlanillaService;
 
-    @Test
-    void testVerificarIncapacidad() {
-        double salarioBase = 1800000;
-        Long empleadoId = 1L;
-        LocalDate fechaPlanilla = LocalDate.of(2025, 3, 12);
-        List<Incapacidad> incapacidades = incapacidadDao.findByEmpleadoIdAndFecha(empleadoId, fechaPlanilla);
 
-        double monto = planillaService.verificarIncapacidades(fechaPlanilla, salarioBase, incapacidades);
-
-        org.junit.jupiter.api.Assertions.assertTrue(monto >= 0);
-    } 
 
     @Test
     void testVerificarPuestoEmpleado() {

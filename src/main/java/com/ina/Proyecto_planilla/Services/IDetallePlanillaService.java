@@ -6,4 +6,5 @@ import com.ina.Proyecto_planilla.Dto.DetallePlanillaDTO;
 
 public interface  IDetallePlanillaService {
     List<DetallePlanillaDTO> obtenerDetallesPorPlanilla(Long idPlanilla);
+    DetallePlanillaDTO obtenerDetallePorId(Long idDetallePlanilla);
 }
