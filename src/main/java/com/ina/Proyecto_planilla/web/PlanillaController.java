@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,6 +36,9 @@ public class PlanillaController {
 
     @RequestMapping("/")
     public String index(Model model) {
+
+        List<Planilla> planillas = planillaService.findAllPlanilla();
+        model.addAttribute("planillas", planillas);
 
         return "Planilla/index";
     }
@@ -82,29 +86,22 @@ public class PlanillaController {
         Long res = planillaService.generarPlanilla(planilla);
 
         if (res > 0) {
-            // Obtener la planilla generada
-            Planilla nuevaPlanilla = planillaService.obtenerPlanillaPorId(res);
-            if(nuevaPlanilla != null) {
-                model.addAttribute("planilla", nuevaPlanilla);
-            } else {
-                model.addAttribute("error", "No se pudo obtener la planilla generada.");
-                return "Planilla/crearPlanilla"; // Aquí se pondría el error
-            }
-            // Agregar la planilla al modelo para pasarla al siguiente método
-            return "Planilla/listarDetalles"; //Hay que redigir ya sea a la misma pagina pero cargando en la parte de abajo los detalles o crear una pagina solo para mostrar 
+            return "redirect:/planillas/detalles/" + res; // REDIRECCIÓN a método GET con el ID
         } else {
-            return "Planilla/crearPlanilla"; //Aqui se pondría el error
+            model.addAttribute("error", "No se pudo generar la planilla.");
+            return "Planilla/crearPlanilla";
         }
-
     }
 
-    @GetMapping("/detalles")
-    public String mostrarDetallesPlanilla(@ModelAttribute("planilla") Planilla planilla, Model model) {
+    @GetMapping("/detalles/{id}")
+    public String mostrarDetallesPlanilla(@PathVariable("id") Long idPlanilla, Model model) {
+        Planilla planilla = planillaService.obtenerPlanillaPorId(idPlanilla);
         model.addAttribute("planilla", planilla);
-        List<DetallePlanillaDTO> detallesPlanilla = detallePlanillaService.obtenerDetallesPorPlanilla(planilla.getId_planilla());
+
+        List<DetallePlanillaDTO> detallesPlanilla = detallePlanillaService.obtenerDetallesPorPlanilla(idPlanilla);
         model.addAttribute("detallesPlanilla", detallesPlanilla);
 
-        return "Planilla/ListarDetalles";
+        return "Planilla/listarDetalles";
     }
 
 }

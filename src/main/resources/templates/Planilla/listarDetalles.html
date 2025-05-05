@@ -53,17 +53,17 @@
                         </thead>
                         <tbody>
                             <tr th:each="detalle : ${detallesPlanilla}">
-                                <td th:text="${detalle.id_detalle_planilla}"></td>
-                                <td th:text="${detalle.nombre_empleado}"></td>
-                                <td th:text="${#numbers.formatDecimal(detalle.salario_base, 1, 2)}"></td>
-                                <td th:text="${#numbers.formatDecimal(detalle.salario_bruto, 1, 2)}"></td>
+                                <td th:text="${detalle.idDetallePlanilla}"></td>
+                                <td th:text="${detalle.nombreEmpleado}"></td>
+                                <td th:text="${#numbers.formatDecimal(detalle.salarioBase, 1, 2)}"></td>
+                                <td th:text="${#numbers.formatDecimal(detalle.salarioBruto, 1, 2)}"></td>
                                 <td th:text="${#numbers.formatDecimal(detalle.deducciones, 1, 2)}"></td>
-                                <td th:text="${#numbers.formatDecimal(detalle.salario_neto, 1, 2)}"></td>
-                                <td th:text="${#numbers.formatDecimal(detalle.adelanto_quincenal, 1, 2)}"></td>
-                                <td th:text="${#numbers.formatDecimal(detalle.salario_mensual, 1, 2)}"></td>
+                                <td th:text="${#numbers.formatDecimal(detalle.salarioNeto, 1, 2)}"></td>
+                                <td th:text="${#numbers.formatDecimal(detalle.adelantoQuincenal, 1, 2)}"></td>
+                                <td th:text="${#numbers.formatDecimal(detalle.salarioMensual, 1, 2)}"></td>
                                 <td>
-                                    <a th:href="@{/planilla/detalle/{id}(id=${detalle.id_detalle_planilla})}" class="btn btn-info btn-sm">
-                                        <i class="fas fa-eye"></i> Desglose
+                                    <a th:href="@{/planilla/detalle/{id}(id=${detalle.idDetallePlanilla})}" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-file-text-fill"></i> Desglose
                                     </a>
                                 </td>
                             </tr>

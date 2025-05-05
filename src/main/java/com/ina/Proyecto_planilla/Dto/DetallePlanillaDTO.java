@@ -13,6 +13,7 @@ import lombok.Data;
 public class DetallePlanillaDTO {
     private Long idDetallePlanilla;
     private Long idEmpleado;
+    private String nombreEmpleado;
     private Long idPlanilla;
     private double salarioBase;
     private double salarioBruto;

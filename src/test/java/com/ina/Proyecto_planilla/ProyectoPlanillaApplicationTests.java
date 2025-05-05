@@ -96,6 +96,7 @@ class ProyectoPlanillaApplicationTests {
 
         Assertions.assertTrue(resultado > 0);
     }
+
     @Test 
     void testGenerarPlanilla(){
 

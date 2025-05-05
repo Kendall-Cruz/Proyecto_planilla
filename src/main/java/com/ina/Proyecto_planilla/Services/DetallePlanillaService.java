@@ -27,6 +27,7 @@ public class DetallePlanillaService implements IDetallePlanillaService {
         return detallesPlanilla.stream().map(detalle -> new DetallePlanillaDTO(
                 detalle.getId_detalle_planilla(),
                 detalle.getEmpleado().getId_empleado(),
+                detalle.getEmpleado().getNombre() + " " + detalle.getEmpleado().getApellido1() + " " + detalle.getEmpleado().getApellido2(),
                 detalle.getPlanilla().getId_planilla(),
                 detalle.getSalario_base(),
                 detalle.getSalario_bruto(),

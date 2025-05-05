@@ -21,12 +21,11 @@ public interface IEmpleadoDao extends JpaRepository<Empleado, Long> {
             + "AND MONTH(:fecha) BETWEEN MONTH(pe.fecha_nombramiento) AND MONTH(pe.fecha_vence) "
             + "AND YEAR(:fecha) BETWEEN YEAR(pe.fecha_nombramiento) AND YEAR(pe.fecha_vence) "
             + "AND pe.borrado = 0", nativeQuery = true)
-    Puesto_empleado findActivePuestoByEmpleadoAndDate(@Param("empleadoId") Long empleadoId,@Param("fecha") LocalDate fecha);
+    Puesto_empleado findActivePuestoByEmpleadoAndDate(@Param("empleadoId") Long empleadoId, @Param("fecha") LocalDate fecha);
 
     @Query(value = "SELECT DISTINCT e.* FROM Puestos_empleado pe "
             + "JOIN Empleados e ON pe.id_empleado = e.id_empleado "
-            + "WHERE MONTH(:fecha) BETWEEN MONTH(pe.fecha_nombramiento) AND MONTH(pe.fecha_vence) "
-            + "AND YEAR(:fecha) BETWEEN YEAR(pe.fecha_nombramiento) AND YEAR(pe.fecha_vence) "
+            + "WHERE :fecha BETWEEN pe.fecha_nombramiento AND pe.fecha_vence "
             + "AND pe.borrado = 0", nativeQuery = true)
     List<Empleado> findAllEmpleadoActivoEnMesSQL(@Param("fecha") LocalDate fecha);
 
@@ -41,5 +40,12 @@ public interface IEmpleadoDao extends JpaRepository<Empleado, Long> {
             + "FROM empleados e WHERE e.id_empleado = :empleadoId",
             nativeQuery = true)
     int getPuntosCarreraByEmpleadoId(@Param("empleadoId") Long empleadoId);
+
+    @Query("SELECT pe FROM Puesto_empleado pe "
+            + "JOIN FETCH pe.empleado e "
+            + "JOIN FETCH pe.puesto p "
+            + "WHERE :fecha BETWEEN pe.fecha_nombramiento AND pe.fecha_vence "
+            + "AND pe.borrado = false")
+    List<Puesto_empleado> findAllPuestosActivosConEmpleado(@Param("fecha") LocalDate fecha);
 
 }

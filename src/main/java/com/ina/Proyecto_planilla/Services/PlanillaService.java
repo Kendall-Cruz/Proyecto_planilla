@@ -60,12 +60,97 @@ public class PlanillaService implements IPlanillaService {
     @Autowired
     private IPorcentaje_rentaDao porcentaje_rentaDao;
 
-
     @Override
     public Planilla obtenerPlanillaPorId(Long idPlanilla) {
         return planillaDao.findById(idPlanilla).orElse(null);
     }
 
+    @Override
+    public List<Planilla> findAllPlanilla() {
+        return planillaDao.findAll();
+    }
+
+    @Transactional
+    @Override
+    public Long generarPlanilla(Planilla planilla) {
+        try {
+            planillaDao.save(planilla);
+
+            List<Puesto_empleado> puestosActivos = empleadoDao.findAllPuestosActivosConEmpleado(planilla.getFecha_planilla());
+
+            for (Puesto_empleado puesto : puestosActivos) {
+                Empleado empleado = puesto.getEmpleado();
+                double salarioMesPasado = empleadoService.obtenerSalarioBaseMesAnterior(empleado.getId_empleado(), planilla.getFecha_planilla());
+                double salarioBase = puesto.getPuesto().getSalario_base();
+                double subsidio = 0.0;
+                double salarioBruto = salarioBase;
+
+                // Crear detalle con salario base
+                Detalle_planilla detalle = new Detalle_planilla(empleado, planilla);
+                detallePlanillaDao.save(detalle);
+                
+                detalle.setSalario_base(salarioBase);
+
+                int aniosTrabajados = empleadoDao.countTotalDiasTrabajados(empleado.getId_empleado()) / 365;
+
+                List<Incapacidad> incapacidades = incapacidadDao.findByEmpleadoIdAndFecha(empleado.getId_empleado(), planilla.getFecha_planilla());
+
+                if (incapacidades.isEmpty()) {
+                    detalle.setMonto_subsidio(0.0);
+                } else {
+                    subsidio = verificarIncapacidades(planilla.getFecha_planilla(), salarioMesPasado, incapacidades);
+                    detalle.setMonto_subsidio(subsidio == salarioMesPasado ? salarioMesPasado * 0.40 : subsidio);
+                }
+
+                // Pagos adicionales si NO es salario global
+                if (!puesto.getPuesto().isSalario_global()) {
+                    double pagos = calcularPagos(detalle, puesto, aniosTrabajados);
+                    double puntosCarrera = calcularPuntosCarrera(empleado.getId_empleado());
+
+                    detalle.setPagos(pagos);
+                    detalle.setMonto_puntos_carrera(puntosCarrera);
+
+                    salarioBruto += pagos + puntosCarrera;
+                }
+
+                // Guardar el salario bruto original
+                detalle.setSalario_bruto(salarioBruto);
+
+                // Pensiones
+                double montoPensiones = calcularPensiones(empleado.getId_empleado(), planilla.getFecha_planilla(), salarioBruto);
+                detalle.setMonto_pensiones(montoPensiones);
+                salarioBruto -= montoPensiones;
+
+                // Porcentaje de renta
+                double montoRenta = calcularPorcentajeDeRenta(salarioBruto, planilla.getFecha_planilla());
+                detalle.setMonto_porcentaje_renta(montoRenta);
+                salarioBruto -= montoRenta;
+
+                // Otras deducciones
+                double deducciones = calcularDeducciones(detalle, puesto, salarioBruto, aniosTrabajados);
+                detalle.setDeducciones(deducciones);
+                salarioBruto -= deducciones;
+
+                // Salario neto (ya con subsidio)
+                double salarioNeto = salarioBruto + detalle.getMonto_subsidio();
+                detalle.setSalario_neto(salarioNeto);
+
+                // Distribución quincenal y mensual
+                detalle.setAdelanto_quincenal((salarioNeto * 40) / 100);
+                detalle.setSalario_mensual((salarioNeto * 60) / 100);
+
+                // Guardar detalle final
+                detallePlanillaDao.save(detalle);
+            }
+
+            return planilla.getId_planilla();
+
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    /*   
     @Transactional
     @Override
     public Long generarPlanilla(Planilla planilla) {
@@ -136,8 +221,7 @@ public class PlanillaService implements IPlanillaService {
         } catch (Exception e) {
             throw e;
         }
-    }
-
+    }*/
     public double verificarIncapacidades(LocalDate fechaPlanilla, double salarioBase, List<Incapacidad> incapacidades) {
         int totalDiasIncapacidad = 0;
 
@@ -299,8 +383,5 @@ public class PlanillaService implements IPlanillaService {
 
         return monto_porcentaje_renta;
     }
-
-
-
 
 }

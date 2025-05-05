@@ -3,7 +3,7 @@
 <head th:replace="Layout/plantilla :: head">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Planillas</title>
 </head>
 <body>
     <header th:replace="Layout/plantilla :: header"></header>
@@ -25,12 +25,61 @@
 
         <div class="row mt-4">
             <div class="col">
-                <div class="card shadow-lg p-4 text-center tarjeta">
+                <!-- Mostrar mensaje si no hay planillas -->
+                <div class="card shadow-lg p-4 text-center tarjeta" th:if="${#lists.isEmpty(planillas)}">
                     <h4 class="titulo">No se registran planillas</h4>
                 </div>
+
+                <!-- Mostrar tabla si hay planillas -->
+                <div th:unless="${#lists.isEmpty(planillas)}">
+                    <div class="card shadow-lg p-4 tarjeta">
+                        <table id="tablaPlanillas" class="table table-bordered text-center">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tipo</th>
+                                    <th>Fecha de Planilla</th>
+                                    <th>Fecha de Pago Quincenal</th>
+                                    <th>Fecha de Pago Mensual</th>
+                                    <th>Fecha de Creación</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="planilla : ${planillas}">
+                                    <td th:text="${planilla.id_planilla}"></td>
+                                    <td th:text="${planilla.tipo_planilla}"></td>
+                                    <td th:text="${planilla.fecha_planilla}"></td>
+                                    <td th:text="${planilla.fecha_pago_quincenal}"></td>
+                                    <td th:text="${planilla.fecha_pago_mensual}"></td>
+                                    <td th:text="${planilla.fecha_creacion}"></td>
+                                    <td>
+                                        <a th:href="@{/planillas/detalles/{id}(id=${planilla.id_planilla})}" class="btn btn-primary btn-sm">Ver</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
-    
+    <script>
+        $(document).ready(function() {
+            $('#tablaPlanillas').DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                },
+                responsive: true,
+                pageLength: 5,
+                columnDefs: [
+                    { orderable: false, targets: 4 },
+                    { className: 'dt-center', targets: [1, 2, 3] },
+                    { className: 'text-start', targets: [0] }
+                ]
+            });
+        });
+    </script>
 </body>
 </html>
