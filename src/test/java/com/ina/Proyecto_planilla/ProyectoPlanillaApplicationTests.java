@@ -14,6 +14,7 @@ import com.ina.Proyecto_planilla.Dao.IIncapacidadDao;
 import com.ina.Proyecto_planilla.Dao.IPensionDao;
 import com.ina.Proyecto_planilla.Dao.IPorcentaje_rentaDao;
 import com.ina.Proyecto_planilla.Dto.DetallePlanillaDTO;
+import com.ina.Proyecto_planilla.Entities.Incapacidad;
 import com.ina.Proyecto_planilla.Entities.Pension;
 import com.ina.Proyecto_planilla.Entities.Planilla;
 import com.ina.Proyecto_planilla.Entities.Porcentaje_renta;
@@ -52,6 +53,16 @@ class ProyectoPlanillaApplicationTests {
         
 
         Assertions.assertNotNull(detallesPlanilla);
+    }
+
+    @Test
+    void testVerificarDiasIncapacidad(){
+        List<Incapacidad> incapacidades = incapacidadDao.findByEmpleadoIdAndFecha( 2L, LocalDate.of(2025, 03, 12));
+
+        long diasincapacidad = planillaService.verificarIncapacidades(LocalDate.of(2025, 03, 12), incapacidades);
+
+        Assertions.assertTrue(diasincapacidad > 0);
+
     }
 
     @Test

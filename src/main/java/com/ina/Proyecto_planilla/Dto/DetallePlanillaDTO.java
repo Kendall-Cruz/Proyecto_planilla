@@ -28,8 +28,9 @@ public class DetallePlanillaDTO {
     private double montoSubsidio;
     private double montoPuntosCarrera;
     private double pagos;
-    private int diasTrabajados;
+    private int diasIncapacidad; 
     private int diasPermisoSinGoce;
+    private int diasTrabajados;
 
     // Listas relacionadas
     private List<Detalle_deduccion> detallesDeducciones;

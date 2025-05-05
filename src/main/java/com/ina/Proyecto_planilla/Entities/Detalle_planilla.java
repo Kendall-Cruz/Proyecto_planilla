@@ -35,6 +35,9 @@ public class Detalle_planilla implements Serializable {
         this.monto_puntos_carrera = 0.0;
         this.pagos = 0.0;
         this.salario_base = 0.0;
+        this.dias_incapacidad = 0;
+        this.dias_permiso_sin_goce = 0;
+        salario_proporcional = 0.0;
     }
 
     public Detalle_planilla(Empleado empleado, Planilla planilla) {
@@ -52,6 +55,9 @@ public class Detalle_planilla implements Serializable {
         this.monto_puntos_carrera = 0.0;
         this.pagos = 0.0;
         this.salario_base = 0.0;
+        this.dias_incapacidad = 0;
+        this.dias_permiso_sin_goce = 0;
+        salario_proporcional = 0.0;
     }
 
     @Id

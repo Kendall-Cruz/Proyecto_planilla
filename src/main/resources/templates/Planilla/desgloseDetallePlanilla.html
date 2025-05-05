@@ -39,19 +39,19 @@
                 <div class="col-md-3 mb-3">
                     <div class="p-3 rounded bg-light">
                         <label class="form-label text-muted small">Días de Incapacidad</label>
-                        <p class="fw-bold fs-5 mb-0" th:text="${20 - detalle.diasTrabajados - detalle.diasPermisoSinGoce}">0</p>
+                        <p class="fw-bold fs-5 mb-0" th:text="${detalle.diasIncapacidad}"></p>
                     </div>
                 </div>
                 <div class="col-md-3 mb-3">
                     <div class="p-3 rounded bg-light">
                         <label class="form-label text-muted small">Días de Permiso Sin Goce</label>
-                        <p class="fw-bold fs-5 mb-0" th:text="${detalle.diasPermisoSinGoce}">0</p>
+                        <p class="fw-bold fs-5 mb-0" th:text="${detalle.diasPermisoSinGoce}"></p>
                     </div>
                 </div>
                 <div class="col-md-3 mb-3">
                     <div class="p-3 rounded bg-success bg-opacity-10">
                         <label class="form-label text-muted small">Días Trabajados</label>
-                        <p class="fw-bold fs-5 mb-0 text-success" th:text="${detalle.diasTrabajados}">20</p>
+                        <p class="fw-bold fs-5 mb-0 text-success" th:text="${detalle.diasTrabajados}"></p>
                     </div>
                 </div>
             </div>

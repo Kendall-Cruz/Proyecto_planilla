@@ -44,6 +44,7 @@ public class DetallePlanillaService implements IDetallePlanillaService {
                 detalle.getPagos(),
                 detalle.getDias_incapacidad(),
                 detalle.getDias_permiso_sin_goce(),
+                20 - (detalle.getDias_incapacidad() + detalle.getDias_permiso_sin_goce()),                
                 detalle.getDetalles_deducciones(),
                 detalle.getDetalle_pagos()
         )).toList();
@@ -76,6 +77,7 @@ public class DetallePlanillaService implements IDetallePlanillaService {
                 detalle.getPagos(),
                 detalle.getDias_incapacidad(),
                 detalle.getDias_permiso_sin_goce(),
+                20 - (detalle.getDias_incapacidad() + detalle.getDias_permiso_sin_goce()),  //Días trabajados   
                 detalle.getDetalles_deducciones(),
                 detalle.getDetalle_pagos()
         );
