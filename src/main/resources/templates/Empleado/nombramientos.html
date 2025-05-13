@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="Layout/plantilla :: head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nombramientos</title> 
+</head>
+<body>
+    <header th:replace="Layout/plantilla :: header"></header>
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h1 class="fw-bold titulo">Nombramientos</h1>
+            <div class="border-bottom-accent mb-4"></div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-6">
+                <div class="text-start">
+                    <a th:href="@{/empleados/}" class="btn btn-primary">
+                        <i class="bi bi-arrow-left"></i> Regresar
+                    </a>
+                </div>
+                
+            </div>
+            <div class="col-6">
+                <div class="text-end">
+                    <a th:href="@{/empleados/listarPuestos}" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i> Agregar nombramiento
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+
+        <div class="row" th:if="${mensaje!=null}">
+            <div class="col-12">
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <span th:text="${mensaje}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        
+        <div th:if="${nombramientos == null or nombramientos.empty}" class="text-center p-5 custom-card rounded-3 shadow">
+            <i class="bi bi-people fs-1 accent-color mb-3"></i>
+            <h3>No hay nombramientos</h3>
+        </div>
+        
+        <div th:if="${nombramientos != null and !nombramientos.empty}" class="table-container p-3">
+            <table id="nombramientosTable" class="table table-success table-striped table-hover shadow-lg">
+                <thead>
+                    <tr>
+                        <th>Empleado</th>
+                        <th>Puesto</th>
+                        <th>Fecha de inicio</th>
+                        <th>Fecha de fin</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="nombramiento : ${nombramientos}">
+                        <td th:text="${nombramiento.empleado.nombre + ' ' + nombramiento.empleado.apellido1 + (nombramiento.empleado.apellido2 != null ? ' ' + nombramiento.empleado.apellido2 : '')}"></td>
+                        <td th:text="${nombramiento.puesto.nombre_puesto}"></td>
+                        <td th:text="${nombramiento.fecha_nombramiento}"></td>
+                        <td th:text="${nombramiento.fecha_vence}"></td>
+                        <td class="text-center">
+                            <a th:href="@{/empleados/editarNombramiento/{id}(id=${nombramiento.id_puesto_empleado})}" class="btn btn-warning">
+                                Editar
+                            </a>
+                            <form th:action="@{/empleados/eliminarNombramiento}" method="post" class="mt-2">
+                                <input type="hidden" name="id" th:value="${nombramiento.id_puesto_empleado}"/>
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar este nombramiento?');">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('#nombramientosTable').DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                },
+                responsive: true,
+                pageLength: 5,
+                columnDefs: [
+                    { orderable: false, targets: 4 },
+                    { className: 'dt-center', targets: [1, 2, 3] },
+                    { className: 'text-start', targets: [0] }
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

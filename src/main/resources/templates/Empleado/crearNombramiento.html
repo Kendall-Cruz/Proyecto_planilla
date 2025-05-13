@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="Layout/plantilla :: head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear un nombramiento</title> 
+</head>
+<body>
+    <header th:replace="Layout/plantilla :: header"></header>
+
+    <div class="container-sm">
+        <div class="row text-center mt-3">
+            <h2 class="text-muted">Editar nombramiento</h2>
+        </div>
+    
+        <div class="row text-center mt-4">
+            <form th:action="@{/empleados/crearNombramiento}" method="post" class="row text-center">
+                <div class="mb-3 col-3">
+                    <label for="puesto" class="form-label fw-bold">Empleado</label>
+                    <input type="text" class="form-control" id="empleado" name="empleado" th:value="${empleado.nombre + ' ' + empleado.apellido1 + ' ' + empleado.apellido2}" disabled>
+                </div>
+                <div class="mb-3 col-3">
+                    <label for="puesto" class="form-label fw-bold">Puesto</label>
+                    <input type="text" class="form-control" id="puesto" name="puesto" th:value="${puesto.nombre_puesto}" disabled>
+                </div>
+                <div class="mb-3 col-3">
+                    <label for="fechaInicio" class="form-label fw-bold">Fecha de inicio</label>
+                    <input type="date" class="form-control" id="fecha_nombramiento" name="fecha_nombramiento">
+                </div>
+                <div class="mb-3 col-3">
+                    <label for="fechaFin" class="form-label fw-bold">Fecha de fin</label>
+                    <input type="date" class="form-control" id="fecha_vence" name="fecha_vence">
+                </div>
+                <button type="submit" class="btn btn-primary">Generar nombramiento</button>
+            </form>
+        </div>
+        <div class="row" th:if="${mensaje!=null}">
+            <div class="col-12">
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <span th:text="${mensaje}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

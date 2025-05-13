@@ -1,35 +1,18 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-
 <head th:replace="Layout/plantilla :: head">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Empleados</title>
-
+    <title>Lista Puestos</title> 
 </head>
-
 <body>
-    <header th:replace="Layout/plantilla :: header"></header>
-    <div class="container py-5">
-        <div class="text-center mb-3">
-            <h1 class="fw-bold titulo">Empleados</h1>
-            <div class="border-bottom-accent mb-4"></div>
+    <div class="container-sm">
+        <div class="row text-center mt-2">
+            <h2 class="text-muted">Seleccione un empleado</h2>
+            <hr>
         </div>
-
-        
-
-        <div class="row mb-3">
-            <div class="col-12"> 
-                <div class="text-end">
-                    <a th:href="@{/empleados/nombramientos}" class="btn btn-success">
-                        <i class="bi bi-plus-circle"></i> Ver Nombramientos
-                    </a>
-                </div>
-                
-            </div>
-
-        </div>
-
+    </div>
+    <div class="container-sm">
         <div th:if="${empleados == null or empleados.empty}" class="text-center p-5 custom-card rounded-3 shadow">
             <i class="bi bi-people fs-1 accent-color mb-3"></i>
             <h3>No hay empleados disponibles</h3>
@@ -43,27 +26,26 @@
                         <th>Nombre completo</th>
                         <th>Teléfono</th>
                         <th>Correo</th>
-                        <th>Acciones</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="emp : ${empleados}">
-                        <td th:text="${emp.cedula}">123456789</td>
-                        <td
-                            th:text="${emp.nombre + ' ' + emp.apellido1 + (emp.apellido2 != null ? ' ' + emp.apellido2 : '')}">
-                            Nombre Completo</td>
-                        <td th:text="${emp.telefono}">12345678</td>
-                        <td th:text="${emp.correo}">correo@ejemplo.com</td>
+                        <td th:text="${emp.cedula}"></td>
+                        <td th:text="${emp.nombre + ' ' + emp.apellido1 + (emp.apellido2 != null ? ' ' + emp.apellido2 : '')}"></td>
+                        <td th:text="${emp.telefono}"></td>
+                        <td th:text="${emp.correo}"></td>
                         <td>
-                            <div class="btn-group">
-
-                            </div>
+                            <a th:href="@{/empleados/crearNombramiento/{id}(id=${emp.id_empleado})}" class="btn btn-primary">
+                                Seleccionar
+                            </a>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
+
     <script>
         $(document).ready(function () {
             $('#empleadosTable').DataTable({
@@ -81,5 +63,4 @@
         });
     </script>
 </body>
-
 </html>

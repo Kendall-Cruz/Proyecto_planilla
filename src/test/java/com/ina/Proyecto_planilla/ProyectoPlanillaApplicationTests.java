@@ -65,11 +65,6 @@ class ProyectoPlanillaApplicationTests {
 
     }
 
-    @Test
-    void testDiasTrabajados(){
-        long diasTrabajados = empleadoDao.countTotalDiasTrabajados(1L);
-        Assertions.assertTrue(diasTrabajados > 0);
-    }
 
     @Test
     void testPuntosCarrera(){

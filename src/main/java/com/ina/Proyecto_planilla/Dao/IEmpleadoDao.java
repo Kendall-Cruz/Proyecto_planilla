@@ -48,4 +48,8 @@ public interface IEmpleadoDao extends JpaRepository<Empleado, Long> {
             + "AND pe.borrado = false")
     List<Puesto_empleado> findAllPuestosActivosConEmpleado(@Param("fecha") LocalDate fecha);
 
+    @Query("SELECT pe FROM Puesto_empleado pe "
+            + "where pe.empleado.id = :id and pe.borrado = false")
+    List<Puesto_empleado> findAllPuestoByEmpleadoId(@Param("id") Long id);
+
 }

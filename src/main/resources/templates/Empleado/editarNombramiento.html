@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head th:replace="Layout/plantilla :: head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <header th:replace="Layout/plantilla :: header"></header>
+
+    <div class="container-sm">
+        <div class="row text-center mt-3">
+            <h2 class="text-muted">Editar nombramiento</h2>
+        </div>
+    
+        <div class="row text-center mt-4">
+            <form th:action="@{/empleados/editarNombramiento}" method="post" th:object="${puesto_empleado}" class="row text-center">
+                <input type="hidden" name="id" th:value="${puesto_empleado.id_puesto_empleado}"/>
+                <div class="mb-3 col-3">
+                    <label for="puesto" class="form-label fw-bold">Empleado</label>
+                    <input type="text" class="form-control" id="empleado" name="empleado" th:value="${puesto_empleado.empleado.nombre + ' ' + puesto_empleado.empleado.apellido1 + ' ' + puesto_empleado.empleado.apellido2}" disabled>
+                </div>
+                <div class="mb-3 col-3">
+                    <label for="puesto" class="form-label fw-bold">Puesto</label>
+                    <input type="text" class="form-control" id="puesto" name="puesto" th:value="${puesto_empleado.puesto.nombre_puesto}" disabled>
+                </div>
+                <div class="mb-3 col-3">
+                    <label for="fechaInicio" class="form-label fw-bold">Fecha de inicio</label>
+                    <input type="date" class="form-control" id="fecha_nombramiento" name="fecha_nombramiento" th:value="${puesto_empleado.fecha_nombramiento}" disabled>
+                </div>
+                <div class="mb-3 col-3">
+                    <label for="fechaFin" class="form-label fw-bold">Fecha de fin</label>
+                    <input type="date" class="form-control" id="fecha_vence" name="fecha_vence" th:value="${puesto_empleado.fecha_vence}">
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            </form>
+            
+
+        </div>
+    </div>
+
+</body>
+</html>

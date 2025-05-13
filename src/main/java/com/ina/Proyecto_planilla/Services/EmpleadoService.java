@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ina.Proyecto_planilla.Dao.IEmpleadoDao;
+import com.ina.Proyecto_planilla.Dao.IPuesto_empleadoDao;
 import com.ina.Proyecto_planilla.Entities.Empleado;
 import com.ina.Proyecto_planilla.Entities.Puesto_empleado;
 
@@ -16,6 +17,8 @@ public class EmpleadoService implements IEmpleadoService {
 
     @Autowired
     private IEmpleadoDao empleadoDao;
+    @Autowired
+    private IPuesto_empleadoDao puestoEmpleadoDao;
 
     @Override
     public List<Empleado> listarEmpleados() {
@@ -43,5 +46,33 @@ public class EmpleadoService implements IEmpleadoService {
     public List<Empleado> findAllEmpleadoActivoFecha(LocalDate fecha) {
         return empleadoDao.findAllEmpleadoActivoEnMesSQL(fecha);
     }
+    @Override
+    public List<Puesto_empleado> findAllNombramientos() {
+        List<Puesto_empleado> puestos = puestoEmpleadoDao.findAll();
+
+        return puestos.stream()
+                .filter(p -> !p.isBorrado())
+                .toList();
+    }
+    @Override
+    public Empleado findEmpleadoById(Long id) {
+        return empleadoDao.findById(id).orElse(null);
+    }
+
+    @Override
+    public boolean verificarPuestoActivoEntreFechas(Empleado emplado , LocalDate fecha_inico , LocalDate fecha_fin){
+        List<Puesto_empleado> puestos = empleadoDao.findAllPuestoByEmpleadoId(emplado.getId_empleado());
+
+        for (Puesto_empleado puesto : puestos) {
+
+            if (puesto.getFecha_nombramiento().isBefore(fecha_fin) && puesto.getFecha_vence().isAfter(fecha_inico)) {
+                return true; // El puesto está activo entre las fechas dadas
+            }
+        }
+        return false; // Ningún puesto activo entre las fechas dadas
+    }
+
+
+    
     
 }

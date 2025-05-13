@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="Layout/plantilla :: head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista Puestos</title> 
+</head>
+<body>
+    <div class="container-sm">
+        <div class="row text-center mt-2">
+            <h2 class="text-muted">Seleccione un puesto</h2>
+            <hr>
+        </div>
+    </div>
+    <div class="container-sm">
+        <div th:if="${puestos != null and !puestos.empty}" class="table-container p-3">
+            <table id="puestoTable" class="table table-success table-striped table-hover shadow-lg">
+                <thead>
+                    <tr>
+                        <th>Puesto</th>
+                        <th>Salario base</th>
+                        <th>Categoría</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="puesto : ${puestos}">
+                        <td th:text="${puesto.nombre_puesto}"></td>
+                        <td th:text="${puesto.salario_base}"></td>
+                        <td th:text="${puesto.categoria}"></td>
+                        <td class="text-center">
+                            <a th:href="@{/empleados/listarEmpleados/{id}(id=${puesto.id_puesto})}" class="btn btn-primary">
+                                Seleccionar
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#puestoTable').DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                },
+                responsive: true,
+                pageLength: 5,
+                columnDefs: [
+                    { className: 'dt-center', targets: [1, 2, 3] },
+                    { className: 'text-start', targets: [0] }
+                ]
+            });
+        });
+    </script>
+</body>
+</html>
